@@ -2,7 +2,6 @@
   "name": "@baozun/ivy-generator",
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/common": "^8.2.9",
     "@angular/core": "^8.2.9"
   }
 }

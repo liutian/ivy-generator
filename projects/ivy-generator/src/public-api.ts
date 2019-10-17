@@ -16,4 +16,4 @@ export * from './lib/decorator/Input';
 export * from './lib/decorator/Output';
 export * from './lib/decorator/ViewQuery';
 
-export * from './lib/api';
+// export * from './lib/api';
