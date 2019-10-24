@@ -1,8 +1,9 @@
 import { Component, ViewContainerRef, ComponentFactoryResolver, OnInit } from '@angular/core';
 import {
-  CodeFactory, Component as IvyComponent, NodeAttr, Node, apis,
+  CodeFactory, Component as IvyComponent, NodeAttr, Node,
   TextNode, Input as IvyInput, Output as IvyOutput, HostBind as IvyHostBind
 } from '@baozun/ivy-generator';
+import { apis } from './api';
 
 @Component({
   selector: 'app-root',
