@@ -29,7 +29,7 @@ const helloWorldComponent = new IvyComponent('div', [
 // 生成ivy代码
 const componentDef = factory._createComponent(helloWorldComponent);
 
-console.log('_sourceCodes' + helloWorldComponent._sourceCodes);
+console.log('Ivy Code: \n\n' + helloWorldComponent._sourceCodes);
 
 // 将组件呈现在页面上
 const componentFactory = this.componentFactoryResolver.resolveComponentFactory(componentDef);
