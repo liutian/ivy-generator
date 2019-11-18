@@ -1,27 +1,38 @@
 # IvyGenerator
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.9.
+通过命令式api描述Angular组件，不需要依赖编译器直接生成Ivy代码，适合可视化搭建管理型页面的场景
+> 注意该项目属于底层实现，需要你关注很多底层细节
 
-## Development server
+## Demo
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+npm start
+> 请查阅 `src/app/app.component.ts`
 
-## Code scaffolding
+## hello world
+```
+// 生成ivy代码所需Angular API的引用集合
+(<any>window).gc_apis = apis;
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+// 组件中使用到的所有指令，管道和子组件集合
+const directiveMap = new Map();
+const pipeMap = new Map();
+const componentMap = new Map();
 
-## Build
+// 工厂类初始化
+const factory = new CodeFactory(componentMap, directiveMap, pipeMap);
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+// 组件描述
+const helloWorldComponent = new IvyComponent('div', [
+  new TextNode('hello world')
+]);
 
-## Running unit tests
+// 生成ivy代码
+const componentDef = factory._createComponent(helloWorldComponent);
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+console.log('_sourceCodes' + helloWorldComponent._sourceCodes);
 
-## Running end-to-end tests
+// 将组件呈现在页面上
+const componentFactory = this.componentFactoryResolver.resolveComponentFactory(componentDef);
+this.viewContainerRef.createComponent(componentFactory);
+```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
