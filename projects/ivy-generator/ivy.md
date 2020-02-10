@@ -385,10 +385,10 @@ contentQueries: function AppComponent_ContentQueries(rf, ctx, dirIndex) {
     ng_["ɵɵcontentQuery"](dirIndex, ContentTypeA, true, ContentReadTypeA);
   } if (rf & 2) {
     var _t;
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content3 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content4 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content1 = _t);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content2 = _t);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content3 = _t.first);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content4 = _t.first);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content1 = _t);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content2 = _t);
   }
 },
 ```
@@ -413,10 +413,10 @@ viewQuery: function AppComponent_Query(rf, ctx) {
   }
   if (rf & 2) {
     var _t;
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view3 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view4 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view1 = _t);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view2 = _t);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view3 = _t.first);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view4 = _t.first);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view1 = _t);
+    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view2 = _t);
   }
 }
 ```
@@ -729,28 +729,22 @@ template: function AppComponent_Template(rf, ctx) {
     if (rf & 1) {
         ng_["ɵɵelement"](0, "div", [1, "aaa", "bbb"]);
         ng_["ɵɵelementStart"](1, "div");
-        ng_["ɵɵstyling"]();
         ng_["ɵɵpipe"](2, "slice");
         ng_["ɵɵpipe"](3, "titlecase");
         ng_["ɵɵpipe"](4, "lowercase");
         ng_["ɵɵelementEnd"]();
         ng_["ɵɵelementStart"](5, "div");
-        ng_["ɵɵstyling"]();
         ng_["ɵɵelementEnd"]();
         ng_["ɵɵelementStart"](6, "div");
-        ng_["ɵɵstyling"]();
         ng_["ɵɵelementEnd"]();
     }
     if (rf & 2) {
         ng_["ɵɵselect"](1);
         ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 6, ng_["ɵɵpipeBind1"](3, 10, ng_["ɵɵpipeBind1"](4, 12, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff\n  ", ctx.clsc, " ggg");
-        ng_["ɵɵstylingApply"]();
         ng_["ɵɵselect"](5);
         ng_["ɵɵclassMap"](ctx.clsd);
-        ng_["ɵɵstylingApply"]();
         ng_["ɵɵselect"](6);
         ng_["ɵɵclassProp"]("cls2", ctx.cls2);
-        ng_["ɵɵstylingApply"]();
     }
 },
 pipes: [
@@ -778,7 +772,6 @@ pipes: [
 function AppComponent_ng_template_6_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵelementStart"](0, "div", [3, "title"]);
-    ng_["ɵɵstyling"]();
     ng_["ɵɵpipe"](1, "slice");
     ng_["ɵɵpipe"](2, "titlecase");
     ng_["ɵɵpipe"](3, "lowercase");
@@ -786,7 +779,6 @@ function AppComponent_ng_template_6_Template(rf, ctx) {
   } if (rf & 2) {
     const ctx_r0 = ng_["ɵɵnextContext"]();
     ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](1, 5, ng_["ɵɵpipeBind1"](2, 9, ng_["ɵɵpipeBind1"](3, 11, ctx_r0.clsa)), 2, 10), " eee ", ctx_r0.clsb, " fff", ctx_r0.clsc, " ggg");
-    ng_["ɵɵstylingApply"]();
     ng_["ɵɵpropertyInterpolate"]("title", ctx_r0.title);
   }
 }
@@ -798,30 +790,24 @@ template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵelement"](0, "div", [1, "aaa", "bbb"]);
     ng_["ɵɵelementStart"](1, "div", [3, "title"]);
-    ng_["ɵɵstyling"]();
     ng_["ɵɵpipe"](2, "slice");
     ng_["ɵɵpipe"](3, "titlecase");
     ng_["ɵɵpipe"](4, "lowercase");
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵelementStart"](5, "div");
-    ng_["ɵɵstyling"]();
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵtemplate"](6, AppComponent_ng_template_6_Template, 4, 13, "ng-template");
     ng_["ɵɵelementStart"](7, "div");
-    ng_["ɵɵstyling"]();
     ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
     ng_["ɵɵselect"](1);
     ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 7, ng_["ɵɵpipeBind1"](3, 11, ng_["ɵɵpipeBind1"](4, 13, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff", ctx.clsc, " ggg");
-    ng_["ɵɵstylingApply"]();
     ng_["ɵɵpropertyInterpolate"]("title", ctx.title);
     ng_["ɵɵselect"](5);
     ng_["ɵɵclassMap"](ctx.clsd);
-    ng_["ɵɵstylingApply"]();
     ng_["ɵɵselect"](7);
     ng_["ɵɵclassProp"]("cls2", ctx.cls2);
-    ng_["ɵɵstylingApply"]();
   }
 }
 pipes: [
@@ -846,7 +832,6 @@ template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵelement"](0, "div", [2, "font-size", "20px", "padding", "10px"]);
     ng_["ɵɵelementStart"](1, "div", [2, "font-size", "20px", "padding", "10px"]);
-    ng_["ɵɵstyling"]();
     ng_["ɵɵpipe"](2, "slice");
     ng_["ɵɵpipe"](3, "titlecase");
     ng_["ɵɵpipe"](4, "lowercase");
@@ -858,7 +843,6 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵstyleMap"](ctx.styles);
     ng_["ɵɵstyleProp"]("background-color", ctx.styleColor);
     ng_["ɵɵstylePropInterpolate1"]("background-color", "red", ng_["ɵɵpipeBind3"](2, 4, ng_["ɵɵpipeBind1"](3, 8, ng_["ɵɵpipeBind1"](4, 10, ctx.styleColor)), 2, 10), "");
-    ng_["ɵɵstylingApply"]();
   }
 }
 pipes: [
@@ -933,10 +917,7 @@ class AppComponent {
 }
 
 hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
-  if (rf & 1) {
-    ng_["ɵɵallocHostVars"](6);
-    ng_["ɵɵstyling"]();
-  } if (rf & 2) {
+  if (rf & 2) {
     ng_["ɵɵhostProperty"]("id", ctx.appId);
     ng_["ɵɵattribute"]("title", ctx.appTitle);
     ng_["ɵɵstyleSanitizer"](ng_["ɵɵdefaultStyleSanitizer"]);
@@ -944,7 +925,6 @@ hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
     ng_["ɵɵclassMap"](ctx.appClass);
     ng_["ɵɵstyleProp"]("font-size", ctx.appFontSize);
     ng_["ɵɵclassProp"]("theme", ctx.appTheme);
-    ng_["ɵɵstylingApply"]();
   }
 }
 ```
@@ -970,14 +950,11 @@ class AppComponent {
 
 hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
   if (rf & 1) {
-    ng_["ɵɵallocHostVars"](1);
     ng_["ɵɵlistener"]("click", function AppComponent_click_HostBindingHandler($event) { 
       return ctx.onClick($event.target); 
     });
-    ng_["ɵɵstyling"]();
   } if (rf & 2) {
     ng_["ɵɵclassProp"]("theme", ctx.appTheme);
-    ng_["ɵɵstylingApply"]();
   }
 },
 ```

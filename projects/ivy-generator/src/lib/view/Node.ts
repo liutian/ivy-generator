@@ -385,9 +385,6 @@ export class Node {
     } else {
       if (node.children.length > 0) {
         initCodes.push(`${apiPath_p}.ng_ɵɵelementStart(${node._index} , '${node.name}' , ${attrsParams} , ${refParams});\n`);
-        if (node._styling) {
-          initCodes.push(`${apiPath_p}.ng_ɵɵstyling();\n`);
-        }
 
         this.postListeners(node, contextNode);
         this.postPipes(node, contextNode);
@@ -395,9 +392,6 @@ export class Node {
         initCodes.push(`${apiPath_p}.ng_ɵɵelementEnd();\n`);
       } else {
         initCodes.push(`${apiPath_p}.ng_ɵɵelement(${node._index}, '${node.name}',${attrsParams},${refParams});\n`);
-        if (node._styling) {
-          initCodes.push(`${apiPath_p}.ng_ɵɵstyling();\n`);
-        }
 
         this.postListeners(node, contextNode);
         this.postPipes(node, contextNode);
@@ -562,7 +556,6 @@ export class Node {
 
       const nextNode = node._varsData[i + 1] && node._varsData[i + 1].index !== currSelectIndex;
       if (((nextNode || i === node._varsData.length - 1) && dynamicClassOrStyle) || (dynamicClassOrStyle && !currDynamicClassOrStyle)) {
-        refreshCodes.push(`${apiPath_p}.ng_ɵɵstylingApply();\n`);
         if (currStyleSanitizer) {
           const code = `${apiPath_p}.ng_ɵɵstyleSanitizer(${apiPath_p}.ng_ɵɵdefaultStyleSanitizer);\n`;
           refreshCodes.splice(currSelectCodeIndex + 1, 0, code);

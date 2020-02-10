@@ -217,13 +217,10 @@ export class Component {
     return `
       hostBindings: function ${componentName_p}_HostBindings(rf,ctx,elIndex){
         if (rf & 1){
-          ${apiPath_p}.ng_ɵɵallocHostVars(${hostBindList.length});
           ${hostListenerStr}
-          ${styling ? apiPath_p + '.ng_ɵɵstyling();' : ''}
         }
         if(rf & 2){
           ${hostRefreshStr}
-          ${styling ? apiPath_p + '.ng_ɵɵstylingApply();' : ''}
         }
       },\n`;
   }
