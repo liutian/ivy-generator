@@ -15,6 +15,7 @@ export class Node {
   _id = 0;
   _index = 0;
   _decls = 0;
+  _constsStr = [];
   _nodeType: 'element' | 'component' | 'container' | 'template' | 'text' | 'root' = 'root';
   _varsData: RefreshData[] = [];
   _templateFnName?: string;
@@ -325,7 +326,8 @@ export class Node {
   }
 
   private gTemplateCode(view: Node) {
-    const refParams = this.gRefParams(view);
+    const refParamsStr = this.gRefParams(view);
+    const refParamsIndex = view._rootNode.getConstsIndex(refParamsStr);
     const prefix = `${apiPath_p}.ng_ɵɵtemplate(${view._index},${view._templateFnName},${view._decls},${view.getVars()},`;
     if (view.name === 'ng-template') {
       const attrs = view._templateAttrs.filter((attr: NodeAttr) => {
@@ -338,8 +340,8 @@ export class Node {
       if (view._bindAttrs.length > 0) {
         attrs.push(<any>3, ...view._bindAttrs.map(a => a.name));
       }
-      const refExtractorParam = refParams !== 'undefined' ? `${apiPath_p}.ng_ɵɵtemplateRefExtractor` : 'undefined';
-      return prefix + `'ng-template',${attrs.length > 0 ? JSON.stringify(attrs) : 'undefined'},${refParams},${refExtractorParam});\n`;
+      const refExtractorParam = refParamsStr !== 'undefined' ? `${apiPath_p}.ng_ɵɵtemplateRefExtractor` : 'undefined';
+      return prefix + `'ng-template',${attrs.length > 0 ? JSON.stringify(attrs) : 'undefined'},${refParamsIndex},${refExtractorParam});\n`;
     } else {
       const attrs = [];
       const bindAttrs: any[] = [];
@@ -362,17 +364,19 @@ export class Node {
   }
 
   private compileElement(node: Node, contextNode: Node, rootNode: Node) {
-    const attrsParams = this.gAttrParams(node);
-    const refParams = this.gRefParams(node);
+    const attrParamsStr = this.gAttrParams(node);
+    const attrParamsIndex = rootNode.getConstsIndex(attrParamsStr);
+    const refParamsStr = this.gRefParams(node);
+    const refParamsIndex = rootNode.getConstsIndex(refParamsStr);
     const initCodes = contextNode._initCodes;
 
     if (node.name === 'ng-container') {
       if (node.children.length > 0) {
-        initCodes.push(`${apiPath_p}.ng_ɵɵelementContainerStart(${node._index} , ${attrsParams} , ${refParams});\n`);
+        initCodes.push(`${apiPath_p}.ng_ɵɵelementContainerStart(${node._index} , ${attrParamsIndex} , ${refParamsIndex});\n`);
         this._compile(node.children, contextNode, rootNode);
         initCodes.push(`${apiPath_p}.ng_ɵɵelementContainerEnd();\n`);
       } else {
-        initCodes.push(`${apiPath_p}.ng_ɵɵelementContainer(${node._index} , ${attrsParams} , ${refParams});\n`);
+        initCodes.push(`${apiPath_p}.ng_ɵɵelementContainer(${node._index} , ${attrParamsIndex} , ${refParamsIndex});\n`);
       }
     } else if (node.name === 'ng-content') {
       let selectorParams = 'undefined';
@@ -383,14 +387,14 @@ export class Node {
       initCodes.push(`${apiPath_p}.ng_ɵɵprojection(${node._index} , ${rootNode._ngContentIndex++} , ${selectorParams});`);
     } else {
       if (node.children.length > 0) {
-        initCodes.push(`${apiPath_p}.ng_ɵɵelementStart(${node._index} , '${node.name}' , ${attrsParams} , ${refParams});\n`);
+        initCodes.push(`${apiPath_p}.ng_ɵɵelementStart(${node._index} , '${node.name}' , ${attrParamsIndex} , ${refParamsIndex});\n`);
 
         this.compileListeners(node, contextNode);
         this.compilePipes(node, contextNode);
         this._compile(node.children, contextNode, rootNode);
         initCodes.push(`${apiPath_p}.ng_ɵɵelementEnd();\n`);
       } else {
-        initCodes.push(`${apiPath_p}.ng_ɵɵelement(${node._index}, '${node.name}',${attrsParams},${refParams});\n`);
+        initCodes.push(`${apiPath_p}.ng_ɵɵelement(${node._index}, '${node.name}',${attrParamsIndex},${refParamsIndex});\n`);
 
         this.compileListeners(node, contextNode);
         this.compilePipes(node, contextNode);
@@ -578,6 +582,19 @@ export class Node {
     } else {
       return 'element';
     }
+  }
+
+  private getConstsIndex(str) {
+    if (str === 'undefined' || str === 'null') {
+      return null;
+    }
+
+    let index = this._constsStr.indexOf(str);
+    if (index === -1) {
+      index = this._constsStr.push(str) - 1;
+    }
+
+    return index;
   }
   // tslint:disable-next-line:max-file-line-count
 }

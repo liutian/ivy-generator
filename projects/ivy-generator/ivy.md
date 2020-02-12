@@ -10,6 +10,57 @@
 *** 禁止style.xxx.yyy
 *** 禁止style.lineHeight,使用style.line-height代替
 
+
+### example
+```
+export const apis: API = {
+  // angular ivy api需要事先枚举引用
+  ng_ɵɵelementStart: ɵɵelementStart,
+  ng_ɵɵelementEnd: ɵɵelementEnd,
+  ng_ɵɵtext: ɵɵtext,
+  ng_ɵɵlistener: ɵɵlistener,
+  ...
+  // 组件中使用的指令，组件，管道，服务需要事先枚举引用
+  ng_NgForOf: NgForOf,
+  ng_NgIf: NgIf,
+  ng_NgModel: NgModel,
+  ng_DefaultValueAccessor: DefaultValueAccessor,
+  ng_NgControlStatus: NgControlStatus,
+}
+
+(<any>window).gc_apis = apis;
+
+const directiveMap = new Map();
+const pipeMap = new Map();
+const componentMap = new Map();
+directiveMap.set('ngForOf', ['ng_NgForOf']);
+directiveMap.set('ngIf', ['ng_NgIf']);
+directiveMap.set('ngModel', ['ng_NgModel', 'ng_DefaultValueAccessor', 'ng_NgControlStatus']);
+
+const factory = new CodeFactory(componentMap, directiveMap, pipeMap, {
+  // 可省略默认配置项
+  namespace: 'gc',
+  apiPath: 'window.gc_apis'
+});
+
+// 定义模板节点
+const containerNode = new Node('div', [], [
+  new TextNode('Hello world!')
+]);
+
+// 创建组件定义对象
+const demoComponentDef = new ComponentDef('Demo', [
+  containerNode
+]);
+
+// 创建组件模型
+const demoComponent = factory._createComponent(demoComponentDef);
+
+// 将组件模型载入视图
+const componentFactory = this.componentFactoryResolver.resolveComponentFactory(demoComponent);
+viewContainerRef.createComponent(componentFactory);
+```
+
 ### 元素嵌套
 ```html
 <div>
@@ -21,6 +72,20 @@
   </ul>
 </div>
 ```
+
+```typescript
+const containerNode = new Node('div', [], [
+  new Node('h3', [], [
+    new TextNode('employee list')
+  ]),
+  new Node('ul', [], [
+    new Node('li', [], [new TextNode('Tom')]),
+    new Node('li', [], [new TextNode('Jack')]),
+    new Node('li', [], [new TextNode('David')])
+  ])
+]);
+```
+
 ```javascript
 decls: 10
 vars: 0
@@ -53,13 +118,23 @@ template: function AppComponent_Template(rf, ctx) {
 ```html
 <input type="text" name="newName" maxlength="10">
 ```
+
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10')
+]);
+```
+
 ```javascript
+consts: [["type", "text", "name", "newName", "maxlength", "10"]],
 decls: 1
 vars: 0
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelement"](0, "input", ["type", "text", "name", "newName", "maxlength", "10"]);
+    ng["ɵɵelement"](0, "input", 0);
   }
 }
 ```
@@ -70,6 +145,24 @@ template: function AppComponent_Template(rf, ctx) {
 ```html
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder">
 ```
+
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10'),
+  new NodeAttr('[placeholder]', 'placeholder')
+]);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  inputNode
+]);
+
+demoComponentDef.classConstructor = `
+  this.placeholder = 'please input new name';
+`;
+```
+
 ```javascript
 class AppComponent {
   constructor(){
@@ -77,12 +170,13 @@ class AppComponent {
   }
 }
 
+consts: [["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder"]]
 decls: 1
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelement"](0, "input", ["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder"]);
+    ng["ɵɵelement"](0, "input", 0);
   }
   if (rf & 2) {
     ng["ɵɵproperty"]("placeholder", ctx.placeholder);
@@ -96,6 +190,31 @@ template: function AppComponent_Template(rf, ctx) {
 ```html
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder" (blur)="onBlur()">
 ```
+
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10'),
+  new NodeAttr('[placeholder]', 'placeholder'),
+  new NodeAttr('(blur)', 'onBlur()')
+]);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  inputNode
+]);
+
+demoComponentDef.classConstructor = `
+  this.placeholder = 'please input new name';
+`;
+
+demoComponentDef.classMethods = [
+  `onBlur(){
+    alert('input new name');
+  }`
+];
+```
+
 ```javascript
 class AppComponent {
   constructor(){
@@ -103,16 +222,17 @@ class AppComponent {
   }
 
   onBlur(){
-    alert(`input new name`);
+    alert('input new name');
   }
 }
 
+consts: [["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "blur"]]
 decls: 1
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelementStart"](0, "input", ["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "blur"]);
+    ng["ɵɵelementStart"](0, "input", 0);
     ng["ɵɵlistener"]("blur", function AppComponent_Template_input_blur_0_listener($event) { return ctx.onBlur(); });
     ng["ɵɵelementEnd"]();
   }

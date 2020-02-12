@@ -124,6 +124,7 @@ export class ComponentDef {
       ${this.rootNode._ngContentSelectorsStr ? 'ngContentSelectors: ' + this.rootNode._ngContentSelectorsStr + ',' : ''}
       decls: ${this.rootNode._decls},
       vars: ${this.rootNode.getVars()},
+      consts: [${this.rootNode._constsStr.join(',')}],
       directives: [${directives}],
       pipes: [${pipes}],
       encapsulation: 2,
