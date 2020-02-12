@@ -3,7 +3,7 @@
  */
 
 export * from './lib/CodeFactory';
-export * from './lib/Component';
+export * from './lib/ComponentDef';
 export * from './lib/ClassDep';
 export * from './lib/view/Node';
 export * from './lib/view/NodeAttr';

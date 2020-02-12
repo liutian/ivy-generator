@@ -1,4 +1,4 @@
-import { ComponentDef } from './Component';
+import { ComponentDef } from './ComponentDef';
 import { apiPath_p, componentName_p } from './key';
 
 const defualt_options = {
