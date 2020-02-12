@@ -8,7 +8,7 @@ import { Node } from './view/Node';
 import { HostListener } from './decorator/HostListener';
 import { componentName_p, apiPath_p } from './key';
 
-export class Component {
+export class ComponentDef {
 
   parentClass: string;
   dependencies: ClassDep[] = [];
@@ -226,7 +226,7 @@ export class Component {
   }
 
   private detectFeatures() {
-    let features = '[';
+    let features = '';
 
     if (Array.isArray(this.classMethods)) {
       const hasChanges = this.classMethods.some(method => {
@@ -237,6 +237,6 @@ export class Component {
       }
     }
 
-    return features + ']';
+    return `[${features}]`;
   }
 }

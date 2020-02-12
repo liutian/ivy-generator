@@ -25,7 +25,7 @@ export class Node {
   _pipesForRoot: Set<string> = new Set();
 
   _compiled = false;
-  _prePost?: boolean;
+  _contextCompiled?: boolean;
   _contextNode?: Node;
   _rootNode?: Node;
   _rTick = 0;
@@ -71,13 +71,13 @@ export class Node {
     this.directiveMap = directiveMap;
     this.pipeMap = pipeMap;
 
-    this.preCompile(this.children, this, this);
+    this.initCompileData(this.children, this, this);
     if (Array.isArray(this._ngContentSelectors) && this._ngContentSelectors.length > 0) {
       this._ngContentSelectorsStr = '[' + this._ngContentSelectors.map(s => `'${s}'`).join(',') + ']';
       this._initCodes.push(`${apiPath_p}.ng_ɵɵprojectionDef(${this._ngContentSelectorsStr});\n`);
     }
-    this.beforePostCompile(this);
-    this.postCompile(this.children, this, this);
+    this.compileContextNode(this);
+    this._compile(this.children, this, this);
     this._compiled = true;
   }
 
@@ -95,7 +95,7 @@ export class Node {
     }, 0);
   }
 
-  private preCompile(childrenNode: Node[], contextNode: Node, rootNode: Node) {
+  private initCompileData(childrenNode: Node[], contextNode: Node, rootNode: Node) {
     for (let i = 0; i < childrenNode.length; i++) {
       const node = childrenNode[i];
       node._id = ++Node.viewTick;
@@ -109,13 +109,13 @@ export class Node {
       }
 
       if (node._nodeType === 'text') {
-        (<TextNode>node).textPre(this.pipeMap);
+        (<TextNode>node).parseText(this.pipeMap);
       } else if (node.attrs.length > 0) {
         node.attrs.sort(NodeAttr.compare);
         if (node._nodeType === 'template') {
-          this.preAttrsForTemplateNode(node, node.attrs);
+          this.parseAttrsForTemplateNode(node, node.attrs);
         } else {
-          this.preAttrsForNotTemplateNode(node);
+          this.parseAttrsForNotTemplateNode(node);
         }
       }
 
@@ -127,12 +127,12 @@ export class Node {
       }
 
       if (Array.isArray(node.children)) {
-        this.preCompile(node.children, isTemplateNode ? node : contextNode, rootNode);
+        this.initCompileData(node.children, isTemplateNode ? node : contextNode, rootNode);
       }
     }
   }
 
-  private preAttrsForNotTemplateNode(node: Node) {
+  private parseAttrsForNotTemplateNode(node: Node) {
     let _tempContextNode = node._contextNode;
     let varsData = _tempContextNode._varsData;
     let varsDataIndex = node._index;
@@ -140,7 +140,7 @@ export class Node {
       structAttr, normalAttrs, classAttr, styleAttr, bindAttrs,
       refAttrs, structAttrList, eventAttrs, textInterpolateAttrs,
       dynamicClass, dynamicStyle
-    } = NodeAttr.preAttrs(node.attrs, this.pipeMap);
+    } = NodeAttr.detectAttrs(node.attrs, this.pipeMap);
 
     node._textInterpolateAttrs = textInterpolateAttrs;
     node._normalAttrs = normalAttrs;
@@ -159,7 +159,7 @@ export class Node {
       varsDataIndex = 0;
       node._consts = 1;
 
-      const { declareVars, templateAttrs, bindAttrs: _bindAttrs } = NodeAttr.fetchAttrsForTemplateNode(structAttrList);
+      const { declareVars, templateAttrs, bindAttrs: _bindAttrs } = NodeAttr.detectAttrsForTemplateNode(structAttrList);
       node._templateAttrs = templateAttrs;
       node._structBindAttrs = _bindAttrs;
 
@@ -239,15 +239,20 @@ export class Node {
     }
   }
 
-  private preAttrsForTemplateNode(node: Node, attrs: NodeAttr[]) {
-    const contextDeclareVars = node._declareVars;
-    const { declareVars, templateAttrs, refAttrs, bindAttrs } = NodeAttr.fetchAttrsForTemplateNode(attrs);
+  private parseAttrsForTemplateNode(node: Node, attrs: NodeAttr[]) {
+    const { declareVars, templateAttrs, refAttrs, bindAttrs } = NodeAttr.detectAttrsForTemplateNode(attrs);
 
     const declareRefs = node._contextNode._declareRefs;
     refAttrs.forEach(attr => {
       attr._index = node._contextNode._consts++;
       if (!declareRefs.has(attr.name)) {
         declareRefs.set(attr.name, attr);
+      }
+    });
+
+    Object.keys(declareVars).forEach(name => {
+      if (!node._declareVars.has(name)) {
+        node._declareVars.set(name, declareVars[name]);
       }
     });
 
@@ -267,12 +272,6 @@ export class Node {
       node._rootNode._directivesForRoot.add(d);
     });
 
-    Object.keys(declareVars).forEach(name => {
-      if (!contextDeclareVars.has(name)) {
-        contextDeclareVars.set(name, declareVars[name]);
-      }
-    });
-
     node._templateAttrs = templateAttrs;
     node._bindAttrs = bindAttrs;
     node._refAttrs = refAttrs;
@@ -287,24 +286,24 @@ export class Node {
     }
   }
 
-  private postCompile(childrenNode: Node[], contextNode: Node, rootNode: Node) {
+  private _compile(childrenNode: Node[], contextNode: Node, rootNode: Node) {
     for (let i = 0; i < childrenNode.length; i++) {
       const node = childrenNode[i];
       if (node._nodeType === 'component' || node._nodeType === 'element' || node._nodeType === 'container') {
-        this.postElement(node, contextNode, rootNode);
+        this.compileElement(node, contextNode, rootNode);
       } else if (node._nodeType === 'template') {
         const initCode = this.gTemplateCode(node);
         contextNode._initCodes.push(initCode);
         if (node.name === 'ng-template') {
-          this.beforePostCompile(node);
-          this.postCompile(node.children, node, rootNode);
+          this.compileContextNode(node);
+          this._compile(node.children, node, rootNode);
           // node.children.forEach(v => {
-          //   this.postElement(v, view, rootView);
+          //   this.compileElement(v, view, rootView);
           // });
         } else {
           node._index = 0;
-          this.beforePostCompile(node);
-          this.postElement(node, node, rootNode);
+          this.compileContextNode(node);
+          this.compileElement(node, node, rootNode);
         }
       } else if (node._nodeType === 'text') {
         if (node._textInterpolate) {
@@ -312,16 +311,16 @@ export class Node {
         } else {
           contextNode._initCodes.push(`${apiPath_p}.ng_ɵɵtext(${node._index},'${node.textContent}');\n`);
         }
-        this.postPipes(node, contextNode);
+        this.compilePipes(node, contextNode);
       }
     }
   }
 
-  private beforePostCompile(contextNode: Node) {
-    if (contextNode._prePost !== true) {
+  private compileContextNode(contextNode: Node) {
+    if (contextNode._contextCompiled !== true) {
       contextNode._initCodes.push(`const currentView = ${apiPath_p}.ng_ɵɵgetCurrentView();\n`);
       this.gRefreshCode(contextNode);
-      contextNode._prePost = true;
+      contextNode._contextCompiled = true;
     }
   }
 
@@ -362,7 +361,7 @@ export class Node {
     }
   }
 
-  private postElement(node: Node, contextNode: Node, rootNode: Node) {
+  private compileElement(node: Node, contextNode: Node, rootNode: Node) {
     const attrsParams = this.gAttrParams(node);
     const refParams = this.gRefParams(node);
     const initCodes = contextNode._initCodes;
@@ -370,7 +369,7 @@ export class Node {
     if (node.name === 'ng-container') {
       if (node.children.length > 0) {
         initCodes.push(`${apiPath_p}.ng_ɵɵelementContainerStart(${node._index} , ${attrsParams} , ${refParams});\n`);
-        this.postCompile(node.children, contextNode, rootNode);
+        this._compile(node.children, contextNode, rootNode);
         initCodes.push(`${apiPath_p}.ng_ɵɵelementContainerEnd();\n`);
       } else {
         initCodes.push(`${apiPath_p}.ng_ɵɵelementContainer(${node._index} , ${attrsParams} , ${refParams});\n`);
@@ -386,20 +385,20 @@ export class Node {
       if (node.children.length > 0) {
         initCodes.push(`${apiPath_p}.ng_ɵɵelementStart(${node._index} , '${node.name}' , ${attrsParams} , ${refParams});\n`);
 
-        this.postListeners(node, contextNode);
-        this.postPipes(node, contextNode);
-        this.postCompile(node.children, contextNode, rootNode);
+        this.compileListeners(node, contextNode);
+        this.compilePipes(node, contextNode);
+        this._compile(node.children, contextNode, rootNode);
         initCodes.push(`${apiPath_p}.ng_ɵɵelementEnd();\n`);
       } else {
         initCodes.push(`${apiPath_p}.ng_ɵɵelement(${node._index}, '${node.name}',${attrsParams},${refParams});\n`);
 
-        this.postListeners(node, contextNode);
-        this.postPipes(node, contextNode);
+        this.compileListeners(node, contextNode);
+        this.compilePipes(node, contextNode);
       }
     }
   }
 
-  private postPipes(node: Node, contextNode: Node) {
+  private compilePipes(node: Node, contextNode: Node) {
     node._textInterpolateAttrs.filter(attr => attr._textInterpolate.pipeCount > 0).forEach(attr => {
       attr._textInterpolate.interpolates.forEach((item: TInterpolate) => {
         item.pipes.forEach((pipe, i) => {
@@ -416,7 +415,7 @@ export class Node {
     }
   }
 
-  private postListeners(node: Node, contextNode: Node) {
+  private compileListeners(node: Node, contextNode: Node) {
     if (node._eventAttrs.length === 0) {
       return;
     }

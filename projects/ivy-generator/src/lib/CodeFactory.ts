@@ -1,4 +1,4 @@
-import { Component } from './Component';
+import { ComponentDef } from './Component';
 import { apiPath_p, componentName_p } from './key';
 
 const defualt_options = {
@@ -7,6 +7,9 @@ const defualt_options = {
 };
 
 export class CodeFactory {
+
+  private componentNameRegx = new RegExp(componentName_p, 'g');
+  private apiPathRegx = new RegExp(apiPath_p, 'g');
 
   constructor(
     public componentMap: Map<string, string>,
@@ -19,32 +22,32 @@ export class CodeFactory {
     this.options = Object.assign(defualt_options, options);
   }
 
-  _createComponent(comp: Component) {
+  _createComponent(compDef: ComponentDef) {
     let gc = (<any>window)[this.options.namespace];
     if (!gc) {
       gc = (<any>window)[this.options.namespace] = {};
     }
 
-    const codes = this.gComponentWrap(comp);
-    comp._sourceCodes = codes;
+    const codes = this.gComponentCodeWrap(compDef);
+    compDef._sourceCodes = codes;
     Function(codes)();
 
-    return gc[comp.className];
+    return gc[compDef.className];
   }
 
-  gComponentWrap(comp: Component) {
-    const codes = this.gComponent(comp);
+  gComponentCodeWrap(compDef: ComponentDef) {
+    const codes = this.gComponentCode(compDef);
     return `(function (window){
       ${codes}
-      window.${this.options.namespace}.${comp.className} = ${comp.className};
+      window.${this.options.namespace}.${compDef.className} = ${compDef.className};
     })(window);\n`;
   }
 
-  gComponent(comp: Component): string {
-    const codes = comp.gCode(this.componentMap, this.directiveMap, this.pipeMap);
+  gComponentCode(compDef: ComponentDef): string {
+    const codes = compDef.gCode(this.componentMap, this.directiveMap, this.pipeMap);
 
-    return codes.replace(new RegExp(componentName_p, 'g'), comp.className)
-      .replace(new RegExp(apiPath_p, 'g'), this.options.apiPath);
+    return codes.replace(this.componentNameRegx, compDef.className)
+      .replace(this.apiPathRegx, this.options.apiPath);
   }
 
 }
