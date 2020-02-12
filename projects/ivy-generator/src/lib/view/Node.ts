@@ -14,7 +14,7 @@ export class Node {
 
   _id = 0;
   _index = 0;
-  _consts = 0;
+  _decls = 0;
   _nodeType: 'element' | 'component' | 'container' | 'template' | 'text' | 'root' = 'root';
   _varsData: RefreshData[] = [];
   _templateFnName?: string;
@@ -100,7 +100,7 @@ export class Node {
       const node = childrenNode[i];
       node._id = ++Node.viewTick;
       node._nodeType = this.detectNodeType(node);
-      node._index = contextNode._consts++;
+      node._index = contextNode._decls++;
       node._contextNode = contextNode;
       node._rootNode = rootNode;
 
@@ -157,7 +157,7 @@ export class Node {
       _tempContextNode = node;
       varsData = _tempContextNode._varsData;
       varsDataIndex = 0;
-      node._consts = 1;
+      node._decls = 1;
 
       const { declareVars, templateAttrs, bindAttrs: _bindAttrs } = NodeAttr.detectAttrsForTemplateNode(structAttrList);
       node._templateAttrs = templateAttrs;
@@ -190,7 +190,7 @@ export class Node {
           if (!this.pipeMap.get(pipe.name)) {
             throw new Error('not found pipe:' + pipe.name);
           }
-          pipe.index = _tempContextNode._consts++;
+          pipe.index = _tempContextNode._decls++;
           this.pipeMap.get(pipe.name).forEach(p => {
             node._rootNode._pipesForRoot.add(p);
           });
@@ -200,7 +200,7 @@ export class Node {
 
     const declareRefs = structAttr ? node._declareRefs : node._contextNode._declareRefs;
     refAttrs.forEach(attr => {
-      attr._index = _tempContextNode._consts++;
+      attr._index = _tempContextNode._decls++;
       if (!declareRefs.has(attr.name)) {
         declareRefs.set(attr.name, attr);
       }
@@ -244,7 +244,7 @@ export class Node {
 
     const declareRefs = node._contextNode._declareRefs;
     refAttrs.forEach(attr => {
-      attr._index = node._contextNode._consts++;
+      attr._index = node._contextNode._decls++;
       if (!declareRefs.has(attr.name)) {
         declareRefs.set(attr.name, attr);
       }
@@ -326,7 +326,7 @@ export class Node {
 
   private gTemplateCode(view: Node) {
     const refParams = this.gRefParams(view);
-    const prefix = `${apiPath_p}.ng_ɵɵtemplate(${view._index},${view._templateFnName},${view._consts},${view.getVars()},`;
+    const prefix = `${apiPath_p}.ng_ɵɵtemplate(${view._index},${view._templateFnName},${view._decls},${view.getVars()},`;
     if (view.name === 'ng-template') {
       const attrs = view._templateAttrs.filter((attr: NodeAttr) => {
         return attr._type === 'attr';

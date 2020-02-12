@@ -22,7 +22,7 @@ export class TextNode extends Node {
         if (!matchPipes) {
           throw new Error('not found pipe:' + pipe.name);
         }
-        pipe.index = this._contextNode._consts++;
+        pipe.index = this._contextNode._decls++;
         matchPipes.forEach(p => {
           this._rootNode._pipesForRoot.add(p);
         });

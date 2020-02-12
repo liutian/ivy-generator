@@ -1,6 +1,6 @@
 
 ### 常用数据
-- `consts` 静态内容的数量，包括普通dom节点（元素和文本），模板变量，文本插值中的管道，ng-template
+- `decls` 静态内容的数量，包括普通dom节点（元素和文本），模板变量，文本插值中的管道，ng-template
 - `vars` 动态内容的数量，包括属性绑定，双向绑定，文本插值数量和文本插值中用到的管道（x2）以及管道的参数，ng-template
 - `index` dom节点，模板变量，管道在模板中位置索引
 - `ɵɵpipeBindX(index,slotOffset)` 插值表达式中使用管道，index:管道的索引，slotOffset:数据偏移量，该值为组件范围内上一次使用的偏移量 + 上一次函数的管道参数（不包括第一个参数） + 2，该字段初始值为
@@ -22,7 +22,7 @@
 </div>
 ```
 ```javascript
-consts: 10
+decls: 10
 vars: 0
 
 template: function AppComponent_Template(rf, ctx) {
@@ -54,7 +54,7 @@ template: function AppComponent_Template(rf, ctx) {
 <input type="text" name="newName" maxlength="10">
 ```
 ```javascript
-consts: 1
+decls: 1
 vars: 0
 
 template: function AppComponent_Template(rf, ctx) {
@@ -77,7 +77,7 @@ class AppComponent {
   }
 }
 
-consts: 1
+decls: 1
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
@@ -107,7 +107,7 @@ class AppComponent {
   }
 }
 
-consts: 1
+decls: 1
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
@@ -140,7 +140,7 @@ class AppComponent {
   }
 }
 
-consts: 2
+decls: 2
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) {
@@ -176,7 +176,7 @@ class AppComponent {
   }
 }
 
-consts: 7
+decls: 7
 vars: 19
 
 template: function AppComponent_Template(rf, ctx) {
@@ -221,7 +221,7 @@ class AppComponent {
   }
 }
 
-consts: 7
+decls: 7
 vars: 19
 
 template: function AppComponent_Template(rf, ctx) {
@@ -269,7 +269,7 @@ function AppComponent_div_2_Template(rf, ctx) {
     }
 }
 
-consts: 3
+decls: 3
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
@@ -322,7 +322,7 @@ class AppComponent {
   }
 }
 
-consts: 3
+decls: 3
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) {
@@ -479,7 +479,7 @@ function AppComponent_li_4_Template(rf, ctx) {
   }
 }
 
-consts: 5, 
+decls: 5, 
 vars: 3,
 
 template: function AppComponent_Template(rf, ctx) {
@@ -556,7 +556,7 @@ class AppComponent {
   }
 }
 
-consts: 3
+decls: 3
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) { 
@@ -633,7 +633,7 @@ function AppComponent_ng_container_2_Template(rf, ctx) {
   }
 }
 
-consts: 3
+decls: 3
 vars: 2
 
 
@@ -664,7 +664,7 @@ directives: [
 <div [ngStyle]="styles"></div>
 ```
 ```javascript
-consts: 2
+decls: 2
 vars: 2
 
 template: function AppComponent_Template(rf, ctx) {
@@ -695,7 +695,7 @@ directives: [
 ```
 ```javascript
 ngContentSelectors: ["*", "*", "*"]
-consts: 5
+decls: 5
 vars: 0
 template: function Demo1Component_Template(rf, ctx) {
   if (rf & 1) {
@@ -722,7 +722,7 @@ template: function Demo1Component_Template(rf, ctx) {
 <div [class.cls2]="cls2"></div>
 ```
 ```javascript
-consts: 7
+decls: 7
 vars: 14
 
 template: function AppComponent_Template(rf, ctx) {
@@ -783,7 +783,7 @@ function AppComponent_ng_template_6_Template(rf, ctx) {
   }
 }
 
-consts: 8
+decls: 8
 vars: 15
 
 template: function AppComponent_Template(rf, ctx) {
@@ -825,7 +825,7 @@ pipes: [
   style.background-color="red{{styleColor| lowercase | titlecase | slice:2:10}}"></div>
 ```
 ```javascript
-consts: 5
+decls: 5
 vars: 12
 
 template: function AppComponent_Template(rf, ctx) {

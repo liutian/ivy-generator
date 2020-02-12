@@ -110,18 +110,19 @@ export class ComponentDef {
     }).join(',');
 
     return `
-    ${componentName_p}.ngComponentDef = ${apiPath_p}.ng_ɵɵdefineComponent({
+    ${componentName_p}.ɵfac = function ${componentName_p}_Factory(t){
+      return new (t || ${componentName_p})(${this.dependencies.map(classDep => classDep.gCode()).join(',')});
+    };
+
+    ${componentName_p}.ɵcmp = ${apiPath_p}.ng_ɵɵdefineComponent({
       type: ${componentName_p},
       selectors: ${JSON.stringify([this.selector.split(',')])},
-      factory: function ${componentName_p}_Factory(t){
-        return new (t || ${componentName_p})(${this.dependencies.map(classDep => classDep.gCode()).join(',')});
-      },
       template: function ${componentName_p}_Template(rf,ctx){
         ${initCodeStr}
         ${refreshCodeStr}
       },
       ${this.rootNode._ngContentSelectorsStr ? 'ngContentSelectors: ' + this.rootNode._ngContentSelectorsStr + ',' : ''}
-      consts: ${this.rootNode._consts},
+      decls: ${this.rootNode._decls},
       vars: ${this.rootNode.getVars()},
       directives: [${directives}],
       pipes: [${pipes}],
