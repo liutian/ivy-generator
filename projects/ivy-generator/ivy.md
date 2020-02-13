@@ -336,7 +336,7 @@ demoComponentDef.classConstructor = `
 ```javascript
 class AppComponent {
   constructor(){
-    this.placeholder = 'please input new name';
+    this.text = 'hello world';
   }
 }
 
@@ -359,7 +359,7 @@ template: function AppComponent_Template(rf, ctx) {
       " || ", 
       ng_["ɵɵpipeBind3"](1, 3, ng_["ɵɵpipeBind1"](2, 7, ng_["ɵɵpipeBind1"](3, 9, ctx.placeholder)), 2, 10), 
       " || ", 
-      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "please input new name")), 2, 10), 
+      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "hello world")), 2, 10), 
       " "
       );
   }
@@ -375,22 +375,43 @@ pipes: [
 
 ### 属性多个差值多个管道多个参数
 ```html
-<input type="text"
-  placeholder="placeholder:{{placeholder}}>{{placeholder | lowercase | titlecase | slice:2:10}}==={{'please input new name' | lowercase | titlecase | slice:2:10}}">
+  <input type="text"
+  placeholder="text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}">
 ```
+
+```typescript
+pipeMap.set('lowercase', ['ng_LowerCasePipe']);
+pipeMap.set('titlecase', ['ng_TitleCasePipe']);
+pipeMap.set('slice', ['ng_SlicePipe']);
+
+const factory = new CodeFactory(componentMap, directiveMap, pipeMap);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('input', [
+    new NodeAttr('type', 'text'),
+    new NodeAttr('placeholder', "text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}")
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.text = 'hello world';
+`;
+```
+
 ```javascript
 class AppComponent {
   constructor(){
-    this.placeholder = 'please input new name';
+    this.text = 'hello world';
   }
 }
 
+consts: [["type", "text", 3, "placeholder"]]
 decls: 7
 vars: 19
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelement"](0, "input", ["type", "text", 3, "placeholder"]);
+    ng_["ɵɵelement"](0, "input", 0);
     ng_["ɵɵpipe"](1, "slice");
     ng_["ɵɵpipe"](2, "titlecase");
     ng_["ɵɵpipe"](3, "lowercase");
@@ -400,12 +421,12 @@ template: function AppComponent_Template(rf, ctx) {
   } if (rf & 2) {
     ng_["ɵɵpropertyInterpolate3"](
       "placeholder", 
-      "placeholder:", 
-      ctx.placeholder, 
-      ">", 
+      "text:", 
+      ctx.text, 
+      " || ", 
       ng_["ɵɵpipeBind3"](1, 3, ng_["ɵɵpipeBind1"](2, 7, ng_["ɵɵpipeBind1"](3, 9, ctx.placeholder)), 2, 10), 
-      "===", 
-      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "please input new name")), 2, 10), 
+      " || ", 
+      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "hello world")), 2, 10), 
       ""
       );
   }
