@@ -67,7 +67,7 @@ export class TextInterpolate {
           return builder.parseExpression(p);
         }).join(',');
 
-        contextNode._interpolateOffsetForContext += 1;
+        // contextNode._interpolateOffsetForContext += 1;
         if (i < item.pipes.length - 1) {
           param = param.replace('#pipe#', `${apiPath_p}.${pipeFnName}(${pipe.index},${contextNode._interpolateOffsetForContext},#pipe#,${pipeParamsStr})`);
         } else {
@@ -75,7 +75,7 @@ export class TextInterpolate {
           param = param.replace('#pipe#', `${apiPath_p}.${pipeFnName}(${pipe.index},${contextNode._interpolateOffsetForContext},${varName},${pipeParamsStr})`);
         }
 
-        contextNode._interpolateOffsetForContext += 1 + pipe.params.length;
+        contextNode._interpolateOffsetForContext += 2 + pipe.params.length;
       });
       return param;
     });

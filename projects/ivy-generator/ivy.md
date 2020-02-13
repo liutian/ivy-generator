@@ -3,7 +3,7 @@
 - `decls` 静态内容的数量，包括普通dom节点（元素和文本），模板变量，文本插值中的管道，ng-template
 - `vars` 动态内容的数量，包括属性绑定，双向绑定，文本插值数量和文本插值中用到的管道（x2）以及管道的参数，ng-template
 - `index` dom节点，模板变量，管道在模板中位置索引
-- `ɵɵpipeBindX(index,slotOffset)` 插值表达式中使用管道，index:管道的索引，slotOffset:数据偏移量，该值为组件范围内上一次使用的偏移量 + 上一次函数的管道参数（不包括第一个参数） + 2，该字段初始值为
+- `ɵɵpipeBindX(index,slotOffset)` 插值表达式中使用管道，index:管道的索引，slotOffset:数据偏移量，该值为组件范围内上一次使用的偏移量 + 上一次函数的管道参数（不包括第一个参数） + 2，该字段初始值为差值文本出现的个数
 
 *** 表达式中不能出现字面量值，例如：{'xx':yy}
 *** ng-content不能嵌套在ng-template或者结构性指令中时会有问题
@@ -314,8 +314,25 @@ directives: [
 
 ### 文本节点多个差值多个管道多个参数
 ```html
-placeholder:{{placeholder}}>{{placeholder | lowercase | titlecase | slice:2:10}}==={{'please input new name' | lowercase | titlecase | slice:2:10}}
+text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}
 ```
+
+```typescript
+pipeMap.set('lowercase', ['ng_LowerCasePipe']);
+pipeMap.set('titlecase', ['ng_TitleCasePipe']);
+pipeMap.set('slice', ['ng_SlicePipe']);
+
+const factory = new CodeFactory(componentMap, directiveMap, pipeMap);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  new TextNode("text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}")
+]);
+
+demoComponentDef.classConstructor = `
+  this.text = 'hello world';
+`;
+```
+
 ```javascript
 class AppComponent {
   constructor(){
@@ -337,13 +354,13 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵpipe"](6, "lowercase");
   } if (rf & 2) {
     ng_["ɵɵtextInterpolate3"](
-      "placeholder:", 
+      "text:", 
       ctx.placeholder, 
-      ">", 
+      " || ", 
       ng_["ɵɵpipeBind3"](1, 3, ng_["ɵɵpipeBind1"](2, 7, ng_["ɵɵpipeBind1"](3, 9, ctx.placeholder)), 2, 10), 
-      "===", 
+      " || ", 
       ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "please input new name")), 2, 10), 
-      "\n"
+      " "
       );
   }
 }
