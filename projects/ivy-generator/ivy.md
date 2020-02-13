@@ -249,6 +249,32 @@ template: function AppComponent_Template(rf, ctx) {
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder" (blur)="onBlur()" [(ngModel)]="newName">
 {{newName}}
 ```
+
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10'),
+  new NodeAttr('[placeholder]', 'placeholder'),
+  new NodeAttr('(blur)', 'onBlur()'),
+  new NodeAttr('[(ngModel)]', 'newName')
+]);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  inputNode, new TextNode('{{newName}}')
+]);
+
+demoComponentDef.classConstructor = `
+  this.placeholder = 'please input new name';
+`;
+
+demoComponentDef.classMethods = [
+  `onBlur(){
+    alert('input new name');
+  }`
+];
+```
+
 ```javascript
 class AppComponent {
   constructor(){
@@ -260,12 +286,13 @@ class AppComponent {
   }
 }
 
+consts: [["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "ngModel", "blur", "ngModelChange"]]
 decls: 2
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelementStart"](0, "input", ["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "ngModel", "blur", "ngModelChange"]);
+    ng["ɵɵelementStart"](0, "input", 0);
     ng["ɵɵlistener"]("blur", function AppComponent_Template_input_blur_0_listener($event) { return ctx.onBlur(); });
     ng["ɵɵlistener"]("ngModelChange", function AppComponent_Template_input_ngModelChange_0_listener($event) { return ctx.newName = $event; });
     ng["ɵɵelementEnd"]();
@@ -273,7 +300,7 @@ template: function AppComponent_Template(rf, ctx) {
   }
   if (rf & 2) {
     ng["ɵɵproperty"]("placeholder", ctx.placeholder)("ngModel", ctx.newName);
-    ng["ɵɵselect"](1);
+    ng["ɵɵadvance"](1);
     ng["ɵɵtextInterpolate1"]("", ctx.newName, "\n");
   }
 }
@@ -400,7 +427,7 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵtemplate"](2, AppComponent_div_2_Template, 2, 0, "div", [4,"ngIf"]);
   } if (rf & 2) {
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngIf", ctx.show);
   }
 }
@@ -427,7 +454,7 @@ function AppComponent_li_2_Template(rf, ctx) {
     const item_r1 = ctx.$implicit;
     const i_r2 = ctx.index;
     const _r3 = ng_["ɵɵreference"](1);
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵtextInterpolate3"]("", _r3, " --- ", item_r1, " --- ", i_r2, "");
   }
 }
@@ -454,7 +481,7 @@ template: function AppComponent_Template(rf, ctx) {
   } 
   if (rf & 2) {
     ng_["ɵɵtextInterpolate1"]("", ctx.title, "\n");
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngForOf", ctx.list)("ngForTrackBy", ctx.trackById);
   }
 }, 
@@ -594,7 +621,7 @@ function AppComponent_li_4_Template(rf, ctx) {
     ng_["ɵɵelementEnd"]();
   } if (rf & 2) {
     const test_r3 = ctx.index;
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵtextInterpolate1"](" ", test_r3, " ");
   }
 }
@@ -617,9 +644,9 @@ template: function AppComponent_Template(rf, ctx) {
   if (rf & 2) {
     const _r0 = ng_["ɵɵreference"](1);
     ng_["ɵɵproperty"]("ngModel", ctx.name);
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵtextInterpolate1"]("\n", _r0, "\n");
-    ng_["ɵɵselect"](4);
+    ng_["ɵɵadvance"](4);
     ng_["ɵɵproperty"]("ngForOf", ctx.list);
   }
 },
@@ -661,7 +688,7 @@ function AppComponent_ng_template_1_Template(rf, ctx) {
     const i_r3 = ctx.index;
     ng_["ɵɵnextContext"]();
     const _r0 = ng_["ɵɵreference"](2);
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵtextInterpolate3"]("", _r0, " --- ", item_r2, " --- ", i_r3, "");
   } 
 }
@@ -687,7 +714,7 @@ template: function AppComponent_Template(rf, ctx) {
   if (rf & 2) {
     const _r0 = ng_["ɵɵreference"](2);
     ng_["ɵɵtextInterpolate1"]("", _r0, "\n");
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵproperty"]("ngForOf", ctx.list)("ngForTrackBy", ctx.trackById);
   }
 }
@@ -727,11 +754,11 @@ function AppComponent_ng_container_2_ng_container_4_Template(rf, ctx) {
     const ctx_r6 = ng_["ɵɵnextContext"]();
     const i_r2 = ctx_r6.index;
     const item_r1 = ctx_r6.$implicit;
-    ng_["ɵɵselect"](3);
+    ng_["ɵɵadvance"](3);
     ng_["ɵɵtextInterpolate1"]("index: ", i_r2, "");
-    ng_["ɵɵselect"](5);
+    ng_["ɵɵadvance"](5);
     ng_["ɵɵtextInterpolate1"]("name: ", item_r1, "");
-    ng_["ɵɵselect"](7);
+    ng_["ɵɵadvance"](7);
     ng_["ɵɵtextInterpolate1"]("ngIf: ", _r5, "");
   }
 }
@@ -746,9 +773,9 @@ function AppComponent_ng_container_2_Template(rf, ctx) {
   } if (rf & 2) {
     const i_r2 = ctx.index;
     const _r3 = ng_["ɵɵreference"](1);
-    ng_["ɵɵselect"](3);
+    ng_["ɵɵadvance"](3);
     ng_["ɵɵtextInterpolate1"]("ngFor: ", _r3, "");
-    ng_["ɵɵselect"](4);
+    ng_["ɵɵadvance"](4);
     ng_["ɵɵproperty"]("ngIf", i_r2 % 2 === 0);
   }
 }
@@ -764,9 +791,9 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵtemplate"](2, AppComponent_ng_container_2_Template, 5, 2, "ng-container", [4, "ngFor", "ngForOf"]);
   } if (rf & 2) {
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵtextInterpolate1"]("head: ", ctx.title, "");
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngForOf", ctx.list);
   }
 }, 
@@ -794,7 +821,7 @@ template: function AppComponent_Template(rf, ctx) {
   } 
   if (rf & 2) {
     ng_["ɵɵproperty"]("ngClass", ctx.cls);
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵproperty"]("ngStyle", ctx.styles);
   }
 },
@@ -859,11 +886,11 @@ template: function AppComponent_Template(rf, ctx) {
         ng_["ɵɵelementEnd"]();
     }
     if (rf & 2) {
-        ng_["ɵɵselect"](1);
+        ng_["ɵɵadvance"](1);
         ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 6, ng_["ɵɵpipeBind1"](3, 10, ng_["ɵɵpipeBind1"](4, 12, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff\n  ", ctx.clsc, " ggg");
-        ng_["ɵɵselect"](5);
+        ng_["ɵɵadvance"](5);
         ng_["ɵɵclassMap"](ctx.clsd);
-        ng_["ɵɵselect"](6);
+        ng_["ɵɵadvance"](6);
         ng_["ɵɵclassProp"]("cls2", ctx.cls2);
     }
 },
@@ -921,12 +948,12 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 7, ng_["ɵɵpipeBind1"](3, 11, ng_["ɵɵpipeBind1"](4, 13, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff", ctx.clsc, " ggg");
     ng_["ɵɵpropertyInterpolate"]("title", ctx.title);
-    ng_["ɵɵselect"](5);
+    ng_["ɵɵadvance"](5);
     ng_["ɵɵclassMap"](ctx.clsd);
-    ng_["ɵɵselect"](7);
+    ng_["ɵɵadvance"](7);
     ng_["ɵɵclassProp"]("cls2", ctx.cls2);
   }
 }
@@ -958,7 +985,7 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵstyleSanitizer"](ng_["ɵɵdefaultStyleSanitizer"]);
     ng_["ɵɵstyleMap"](ctx.styles);
     ng_["ɵɵstyleProp"]("background-color", ctx.styleColor);

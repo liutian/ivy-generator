@@ -1,6 +1,6 @@
 import {
   ɵɵdefineNgModule, ɵɵdefineInjector, ɵɵdefineComponent, ɵɵelementStart, ɵɵelementEnd,
-  ɵɵtext, ɵɵlistener, ɵɵselect, ɵɵproperty, ɵɵdirectiveInject, ɵɵstaticContentQuery,
+  ɵɵtext, ɵɵlistener, ɵɵadvance, ɵɵproperty, ɵɵdirectiveInject, ɵɵstaticContentQuery,
   ɵɵloadQuery, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵqueryRefresh,
   ɵɵcontentQuery, ɵɵhostProperty, EventEmitter, ɵɵtemplate, ɵɵelementContainerStart,
   ɵɵelementContainerEnd, ɵɵgetCurrentView, ɵɵelement, ɵɵelementContainer, ɵɵtemplateRefExtractor,
@@ -35,7 +35,7 @@ export class API {
   ng_ɵɵelementEnd: any;
   ng_ɵɵtext: any;
   ng_ɵɵlistener: any;
-  ng_ɵɵselect: any;
+  ng_ɵɵadvance: any;
   ng_ɵɵdirectiveInject: any;
   ng_ɵɵstaticContentQuery: any;
   ng_ɵɵcontentQuery: any;
@@ -146,7 +146,7 @@ export const apis: API = {
   ng_ɵɵelementEnd: ɵɵelementEnd,
   ng_ɵɵtext: ɵɵtext,
   ng_ɵɵlistener: ɵɵlistener,
-  ng_ɵɵselect: ɵɵselect,
+  ng_ɵɵadvance: ɵɵadvance,
   ng_ɵɵdirectiveInject: ɵɵdirectiveInject,
   ng_ɵɵstaticContentQuery: ɵɵstaticContentQuery,
   ng_ɵɵcontentQuery: ɵɵcontentQuery,
