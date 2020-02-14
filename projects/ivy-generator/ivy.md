@@ -12,7 +12,7 @@
 
 
 ### example
-```
+```typescript
 export const apis: API = {
   // angular ivy api需要事先枚举引用
   ng_ɵɵelementStart: ɵɵelementStart,
@@ -701,6 +701,19 @@ class AppComponent {
   }
 }
 ```
+
+```typescript
+(apis as any).ct_DemoService = DemoService;
+
+demoComponentDef.dependencies = [
+  new ClassDep('httpClient', `${apiPath_p}.ng_HttpClient`),
+  new ClassDep('injector', `${apiPath_p}.ng_Injector`, ['Optional', 'SkipSelf']),
+  new ClassDep('appBaseHref', `${apiPath_p}.ng_APP_BASE_HREF`, ['Optional']),
+  new ClassDep('elementRef', `${apiPath_p}.ng_ElementRef`, ['Optional', 'Self']),
+  new ClassDep('demoService', `${apiPath_p}.ct_DemoService`, ['Optional'])
+]
+```
+
 ```javascript
 class AppComponent {
   constructor(httpClient, injector, appBaseHref, elementRef, demoService) {
@@ -713,7 +726,7 @@ class AppComponent {
 }
 
 
-factory: function AppComponent_Factory(t) {
+AppComponent.ɵfac: function AppComponent_Factory(t) {
   return new (t || AppComponent)(
       ng_["ɵɵdirectiveInject"](ng_["HttpClient"]),
       ng_["ɵɵdirectiveInject"](ng_["Injector"], 12),
