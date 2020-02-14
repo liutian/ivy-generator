@@ -608,23 +608,37 @@ class AppComponent {
   @ContentChild('content-one', { static: true }) content4;
 }
 ```
+
+```typescript
+(<any>window).gc_apis = apis;
+
+(apis as any).ct_ContentTypeA = ContentTypeA;
+(apis as any).ct_ContentTypeB = ContentTypeB;
+(apis as any).ct_ContentReadTypeA = ContentReadTypeA;
+(apis as any).ct_ContentReadTypeB = ContentReadTypeB;
+
+demoComponentDef.contentQueries = [
+  new ContentQuery(false, 'contents', 'content1'),
+  new ContentQuery(false, `@${apiPath_p}.ct_ContentTypeA`, 'content2', { read: `${apiPath_p}.ct_ContentReadTypeA`, descendants: true }),
+  new ContentQuery(true, `@${apiPath_p}.ct_ContentTypeB`, 'content3', { read: `${apiPath_p}.ct_ContentReadTypeB`, static: false }),
+  new ContentQuery(true, 'content-one', 'content4', { static: true })
+]
+```
+
 ```javascript
-class AppComponent {
-
-}
-
 contentQueries: function AppComponent_ContentQueries(rf, ctx, dirIndex) {
   if (rf & 1) {
     ng_["ɵɵcontentQuery"](dirIndex, ContentTypeB, true, ContentReadTypeB);
     ng_["ɵɵstaticContentQuery"](dirIndex, ["content-one"], true);
     ng_["ɵɵcontentQuery"](dirIndex, ["contents"], false);
     ng_["ɵɵcontentQuery"](dirIndex, ContentTypeA, true, ContentReadTypeA);
-  } if (rf & 2) {
+  } 
+  if (rf & 2) {
     var _t;
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content3 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content4 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content1 = _t);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.content2 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content3 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content4 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content1 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content2 = _t);
   }
 },
 ```
@@ -639,6 +653,23 @@ class AppComponent {
   @ViewChild('view-one', { static: true }) view4;
 }
 ```
+
+```typescript
+(<any>window).gc_apis = apis;
+
+(apis as any).ct_ViewTypeA = ViewTypeA;
+(apis as any).ct_ViewTypeB = ViewTypeB;
+(apis as any).ct_ViewReadTypeA = ViewReadTypeA;
+(apis as any).ct_ViewReadTypeB = ViewReadTypeB;
+
+demoComponentDef.viewQueries = [
+  new ViewQuery(false, 'views', 'view1'),
+  new ViewQuery(false, `@${apiPath_p}.ct_ViewTypeA`, 'view2', { read: `${apiPath_p}.ct_ViewReadTypeA` }),
+  new ViewQuery(true, `@${apiPath_p}.ct_ViewTypeB`, 'view3', { read: `${apiPath_p}.ct_ViewReadTypeB`, static: false }),
+  new ViewQuery(true, 'view-one', 'view4', { static: true })
+]
+```
+
 ```javascript
 viewQuery: function AppComponent_Query(rf, ctx) {
   if (rf & 1) {
@@ -649,13 +680,14 @@ viewQuery: function AppComponent_Query(rf, ctx) {
   }
   if (rf & 2) {
     var _t;
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view3 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view4 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view1 = _t);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadQuery"]())) && (ctx.view2 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view3 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view4 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view1 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view2 = _t);
   }
 }
 ```
+
 
 ### constructor 依赖注入
 ```typescript

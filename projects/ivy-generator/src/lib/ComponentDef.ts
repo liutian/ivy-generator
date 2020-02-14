@@ -148,11 +148,11 @@ export class ComponentDef {
       contentQueriesStr = `
       contentQueries: function ${componentName_p}_ContentQueries(rf,ctx,dirIndex){
         if(rf & 1){
-          ${list.map(q => q.gInitCode())}
+          ${list.map(q => q.gInitCode()).join('')}
         }
         if(rf & 2){
           let _t;
-          ${list.map(q => q.gRefreshCode())}
+          ${list.map(q => q.gRefreshCode()).join('')}
         }
       },`;
     }
@@ -162,10 +162,10 @@ export class ComponentDef {
       viewQueryStr = `
       viewQuery: function ${componentName_p}_Query(rf,ctx){
         if(rf & 1){
-          ${list.map(q => q.gInitCode())}
+          ${list.map(q => q.gInitCode()).join('')}
         }
         if(rf & 2){
-          ${list.map(q => q.gRefreshCode())}
+          ${list.map(q => q.gRefreshCode()).join('')}
         }
       },`;
     }
