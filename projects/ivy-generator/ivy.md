@@ -443,30 +443,52 @@ pipes: [
 ### *ngIf
 ```html
 <button (click)="show = !show">toggle</button>
-<div *ngIf="show">text...</div>
+<div *ngIf="show">
+  <a href="http://www.google.com">link...</a>
+</div>
 ```
+
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('button', [
+    new NodeAttr('(click)', 'show = !show')
+  ], [new TextNode('toggle')]),
+  new Node('div', [
+    new NodeAttr('*ngIf', 'show')
+  ], [
+    new Node('a', [new NodeAttr('href', 'http://www.google.com')], [new TextNode('link...')])
+  ])
+]);
+```
+
 ```javascript
 function AppComponent_div_2_Template(rf, ctx) {
-    if (rf & 1) {
-        ng_["ɵɵelementStart"](0, "div");
-        ng_["ɵɵtext"](1, "text...");
-        ng_["ɵɵelementEnd"]();
-    }
+  if (rf & 1) {
+    ng_["ɵɵelementStart"](0, "div");
+    ng_["ɵɵelementStart"](1, "a", 2);
+    ng_["ɵɵtext"](2, "link...");
+    ng_["ɵɵelementEnd"]();
+    ng_["ɵɵelementEnd"]();
+  }
 }
 
+consts: [[3, "click"], [4, "ngIf"], ["href", "http://www.google.com"]]
 decls: 3
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementStart"](0, "button", [3,"click"]);
-    ng_["ɵɵlistener"]("click", function AppComponent_Template_button_click_0_listener($event) { return ctx.show = !ctx.show; });
-    ng_["ɵɵtext"](1, "toggle");
-    ng_["ɵɵelementEnd"]();
-    ng_["ɵɵtemplate"](2, AppComponent_div_2_Template, 2, 0, "div", [4,"ngIf"]);
-  } if (rf & 2) {
-    ng_["ɵɵadvance"](2);
-    ng_["ɵɵproperty"]("ngIf", ctx.show);
+      ng_["ɵɵelementStart"](0, "button", 0);
+      ng_["ɵɵlistener"]("click", function AppComponent_Template_button_click_0_listener($event) {
+          return ctx.show = !ctx.show;
+      });
+      ng_["ɵɵtext"](1, "toggle");
+      ng_["ɵɵelementEnd"]();
+      ng_["ɵɵtemplate"](2, AppComponent_div_2_Template, 3, 0, "div", 1);
+  }
+  if (rf & 2) {
+      ng_["ɵɵadvance"](2);
+      ng_["ɵɵproperty"]("ngIf", ctx.show);
   }
 }
 directives: [ng["NgIf"]]
@@ -478,13 +500,41 @@ directives: [ng["NgIf"]]
 ```html
 {{title}}
 <ul>
-  <li *ngFor="let item of list;let i = index;trackBy: trackById" #title>{{title}} --- {{item}} --- {{i}}</li>
+  <li *ngFor="let item of list;let i = index;trackBy: trackById" #refLi>
+  {{refLi}} --- {{item}} --- {{i}}
+  </li>
 </ul>
 ```
+
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new TextNode('{{title}}'),
+  new Node('ul', [], [
+    new Node('li', [
+      new NodeAttr('*ngFor', 'let item of list;let i = index;trackBy: trackById'),
+      new NodeAttr('#refLi')
+    ], [new TextNode('{{refLi}} --- {{item}} --- {{i}}')])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.title = 'xxx';
+  this.list = ['tom', 'jack', 'david'];
+`;
+
+demoComponentDef.classMethods = [
+  `
+    trackById(index,item) {
+      return item;
+    }
+  `
+];
+```
+
 ```javascript
 function AppComponent_li_2_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementStart"](0, "li", null, ["title", ""]);
+    ng_["ɵɵelementStart"](0, "li", null, 1);
     ng_["ɵɵtext"](2);
     ng_["ɵɵelementEnd"]();
   } 
@@ -507,6 +557,7 @@ class AppComponent {
   }
 }
 
+consts: [[4, "ngFor", "ngForOf", "ngForTrackBy"], ["refLi", ""]]
 decls: 3
 vars: 3
 
@@ -514,11 +565,11 @@ template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵtext"](0);
     ng_["ɵɵelementStart"](1, "ul");
-    ng_["ɵɵtemplate"](2, AppComponent_li_2_Template, 3, 3, "li", [4, "ngFor", "ngForOf", "ngForTrackBy"]);
+    ng_["ɵɵtemplate"](2, AppComponent_li_2_Template, 3, 3, "li", 0);
     ng_["ɵɵelementEnd"]();
   } 
   if (rf & 2) {
-    ng_["ɵɵtextInterpolate1"]("", ctx.title, "\n");
+    ng_["ɵɵtextInterpolate1"](" ", ctx.title, " ");
     ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngForOf", ctx.list)("ngForTrackBy", ctx.trackById);
   }

@@ -326,22 +326,23 @@ export class Node {
   }
 
   private gTemplateCode(view: Node) {
-    const refParamsStr = this.gRefParams(view);
-    const refParamsIndex = view._rootNode.getConstsIndex(refParamsStr);
     const prefix = `${apiPath_p}.ng_ɵɵtemplate(${view._index},${view._templateFnName},${view._decls},${view.getVars()},`;
     if (view.name === 'ng-template') {
+      const refParamsStr = this.gRefParams(view);
+      const refParamsIndex = view._rootNode.getConstsIndex(refParamsStr);
       const attrs = view._templateAttrs.filter((attr: NodeAttr) => {
         return attr._type === 'attr';
       }).reduce((arr, attr) => {
         arr.push(attr.name, '');
         return arr;
       }, []);
+      const attrParamsIndex = view._rootNode.getConstsIndex(attrs.length > 0 ? JSON.stringify(attrs) : 'undefined');
 
       if (view._bindAttrs.length > 0) {
         attrs.push(<any>3, ...view._bindAttrs.map(a => a.name));
       }
       const refExtractorParam = refParamsStr !== 'undefined' ? `${apiPath_p}.ng_ɵɵtemplateRefExtractor` : 'undefined';
-      return prefix + `'ng-template',${attrs.length > 0 ? JSON.stringify(attrs) : 'undefined'},${refParamsIndex},${refExtractorParam});\n`;
+      return prefix + `'ng-template',${attrParamsIndex},${refParamsIndex},${refExtractorParam});\n`;
     } else {
       const attrs = [];
       const bindAttrs: any[] = [];
@@ -358,8 +359,9 @@ export class Node {
       if (bindAttrs.length > 0) {
         bindAttrs.unshift(3);
       }
-      const attrsParams = JSON.stringify([...attrs, ...bindAttrs, ...templateAttrs]);
-      return prefix + `'${view.name}',${attrsParams});\n`;
+      const attrParamsStr = JSON.stringify([...attrs, ...bindAttrs, ...templateAttrs]);
+      const attrParamsStrIndex = view._rootNode.getConstsIndex(attrParamsStr);
+      return prefix + `'${view.name}',${attrParamsStrIndex});\n`;
     }
   }
 
