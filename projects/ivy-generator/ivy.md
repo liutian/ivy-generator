@@ -73,6 +73,7 @@ viewContainerRef.createComponent(componentFactory);
 </div>
 ```
 
+usage
 ```typescript
 const containerNode = new Node('div', [], [
   new Node('h3', [], [
@@ -86,6 +87,7 @@ const containerNode = new Node('div', [], [
 ]);
 ```
 
+compile
 ```javascript
 decls: 10
 vars: 0
@@ -119,6 +121,7 @@ template: function AppComponent_Template(rf, ctx) {
 <input type="text" name="newName" maxlength="10">
 ```
 
+usage
 ```typescript
 const inputNode = new Node('input', [
   new NodeAttr('type', 'text'),
@@ -127,6 +130,7 @@ const inputNode = new Node('input', [
 ]);
 ```
 
+compile
 ```javascript
 consts: [["type", "text", "name", "newName", "maxlength", "10"]],
 decls: 1
@@ -146,6 +150,7 @@ template: function AppComponent_Template(rf, ctx) {
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder">
 ```
 
+usage
 ```typescript
 const inputNode = new Node('input', [
   new NodeAttr('type', 'text'),
@@ -163,6 +168,7 @@ demoComponentDef.classConstructor = `
 `;
 ```
 
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -191,6 +197,7 @@ template: function AppComponent_Template(rf, ctx) {
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder" (blur)="onBlur()">
 ```
 
+usage
 ```typescript
 const inputNode = new Node('input', [
   new NodeAttr('type', 'text'),
@@ -215,6 +222,7 @@ demoComponentDef.classMethods = [
 ];
 ```
 
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -250,6 +258,7 @@ template: function AppComponent_Template(rf, ctx) {
 {{newName}}
 ```
 
+usage
 ```typescript
 const inputNode = new Node('input', [
   new NodeAttr('type', 'text'),
@@ -275,6 +284,7 @@ demoComponentDef.classMethods = [
 ];
 ```
 
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -317,6 +327,7 @@ directives: [
 text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}
 ```
 
+usage
 ```typescript
 pipeMap.set('lowercase', ['ng_LowerCasePipe']);
 pipeMap.set('titlecase', ['ng_TitleCasePipe']);
@@ -333,6 +344,7 @@ demoComponentDef.classConstructor = `
 `;
 ```
 
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -379,6 +391,7 @@ pipes: [
   placeholder="text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}">
 ```
 
+usage
 ```typescript
 pipeMap.set('lowercase', ['ng_LowerCasePipe']);
 pipeMap.set('titlecase', ['ng_TitleCasePipe']);
@@ -398,6 +411,7 @@ demoComponentDef.classConstructor = `
 `;
 ```
 
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -448,6 +462,7 @@ pipes: [
 </div>
 ```
 
+usage
 ```typescript
 const demoComponentDef = new ComponentDef('Demo', [
   new Node('button', [
@@ -461,6 +476,7 @@ const demoComponentDef = new ComponentDef('Demo', [
 ]);
 ```
 
+compile
 ```javascript
 function AppComponent_div_2_Template(rf, ctx) {
   if (rf & 1) {
@@ -506,6 +522,7 @@ directives: [ng["NgIf"]]
 </ul>
 ```
 
+usage
 ```typescript
 const demoComponentDef = new ComponentDef('Demo', [
   new TextNode('{{title}}'),
@@ -531,6 +548,7 @@ demoComponentDef.classMethods = [
 ];
 ```
 
+compile
 ```javascript
 function AppComponent_li_2_Template(rf, ctx) {
   if (rf & 1) {
@@ -586,6 +604,19 @@ class AppComponent implements OnChanges{
   }
 }
 ```
+
+usage
+```typescript
+demoComponentDef.classMethods = [
+  `
+  ngOnChanges(changes) {
+    console.log('changes...');
+  }
+  `
+]
+```
+
+compile
 ```javascript
 class AppComponent{
   ngOnChanges(changes) {
@@ -609,6 +640,7 @@ class AppComponent {
 }
 ```
 
+usage
 ```typescript
 (<any>window).gc_apis = apis;
 
@@ -625,6 +657,7 @@ demoComponentDef.contentQueries = [
 ]
 ```
 
+compile
 ```javascript
 contentQueries: function AppComponent_ContentQueries(rf, ctx, dirIndex) {
   if (rf & 1) {
@@ -654,6 +687,7 @@ class AppComponent {
 }
 ```
 
+usage
 ```typescript
 (<any>window).gc_apis = apis;
 
@@ -670,6 +704,7 @@ demoComponentDef.viewQueries = [
 ]
 ```
 
+compile
 ```javascript
 viewQuery: function AppComponent_Query(rf, ctx) {
   if (rf & 1) {
@@ -702,6 +737,7 @@ class AppComponent {
 }
 ```
 
+usage
 ```typescript
 (apis as any).ct_DemoService = DemoService;
 
@@ -714,6 +750,7 @@ demoComponentDef.dependencies = [
 ]
 ```
 
+compile
 ```javascript
 class AppComponent {
   constructor(httpClient, injector, appBaseHref, elementRef, demoService) {
@@ -724,7 +761,6 @@ class AppComponent {
     this.demoService = demoService;
   }
 }
-
 
 AppComponent.ɵfac: function AppComponent_Factory(t) {
   return new (t || AppComponent)(
@@ -747,6 +783,36 @@ AppComponent.ɵfac: function AppComponent_Factory(t) {
   </li>
 </ul>
 ```
+```typescript 
+class AppComponent {
+  name = '111';
+  list = ['xxx']
+}
+```
+
+usage --- 异常
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('input', [
+    new NodeAttr('type', 'text'),
+    new NodeAttr('[(ngModel)]', 'name'),
+    new NodeAttr('#test', 'ngModel')
+  ]),
+  new TextNode('{{test}}'),
+  new Node('ul', [], [
+    new Node('li', [
+      new NodeAttr('*ngFor', 'let item of list;let test = index')
+    ], [new TextNode('{{test}}')])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.name = '111';
+  this.list = ['xxx'];
+`;
+```
+
+compile
 ```javascript
 function AppComponent_li_4_Template(rf, ctx) {
   if (rf & 1) {
@@ -760,19 +826,20 @@ function AppComponent_li_4_Template(rf, ctx) {
   }
 }
 
+consts: [["type", "text", 3, "ngModel", "ngModelChange"], ["test", "ngModel"], [4, "ngFor", "ngForOf"]]
 decls: 5, 
 vars: 3,
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementStart"](0, "input", ["type", "text", 3, "ngModel", "ngModelChange"], ["test", "ngModel"]);
+    ng_["ɵɵelementStart"](0, "input", 0, 1);
     ng_["ɵɵlistener"]("ngModelChange", function AppComponent_Template_input_ngModelChange_0_listener($event) { 
       return ctx.name = $event; 
     });
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵtext"](2);
     ng_["ɵɵelementStart"](3, "ul");
-    ng_["ɵɵtemplate"](4, AppComponent_li_4_Template, 2, 1, "li", [4, "ngFor", "ngForOf"]);
+    ng_["ɵɵtemplate"](4, AppComponent_li_4_Template, 2, 1, "li", 2);
     ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
@@ -780,7 +847,7 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵproperty"]("ngModel", ctx.name);
     ng_["ɵɵadvance"](2);
     ng_["ɵɵtextInterpolate1"]("\n", _r0, "\n");
-    ng_["ɵɵadvance"](4);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngForOf", ctx.list);
   }
 },
@@ -810,6 +877,40 @@ class AppComponent {
   }
 }
 ```
+
+usage
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new TextNode('{{title}}'),
+  new Node('ng-template', [
+    new NodeAttr('ngFor'),
+    new NodeAttr('let-item'),
+    new NodeAttr('[ngForOf]', 'list'),
+    new NodeAttr('let-i', 'index'),
+    new NodeAttr('[ngForTrackBy]', 'trackById'),
+    new NodeAttr('#title')
+  ], [
+    new Node('span', [], [
+      new TextNode('{{title}} --- {{item}} --- {{i}}')
+    ])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.title = 'xxx';
+  this.list = ['Tom', 'Jack', 'David'];
+`;
+
+demoComponentDef.classMethods = [
+  `
+  trackById(index, item) {
+    return item;
+  }
+  `
+]
+```
+
+compile
 ```javascript
 function AppComponent_ng_template_1_Template(rf, ctx) { 
   if (rf & 1) {
@@ -837,13 +938,14 @@ class AppComponent {
   }
 }
 
+consts: [["ngFor", "", 3, "ngForOf", "ngForTrackBy"], ["title", ""]]
 decls: 3
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) { 
   if (rf & 1) {
     ng_["ɵɵtext"](0);
-    ng_["ɵɵtemplate"](1, AppComponent_ng_template_1_Template, 2, 3, "ng-template", ["ngFor", "", 3, "ngForOf", "ngForTrackBy"], ["title", ""], ng_["ɵɵtemplateRefExtractor"]);
+    ng_["ɵɵtemplate"](1, AppComponent_ng_template_1_Template, 2, 3, "ng-template", 0, 1, ng_["ɵɵtemplateRefExtractor"]);
   } 
   if (rf & 2) {
     const _r0 = ng_["ɵɵreference"](2);
@@ -869,6 +971,34 @@ directives: [ng_["NgForOf"]],
   </ng-container>
 </ng-container>
 ```
+
+```typescript  --- 异常
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('div', [], [
+    new TextNode('head: {{title}}')
+  ]),
+  new Node('ng-container', [
+    new NodeAttr('*ngFor', 'let item of list;let i = index;'),
+    new NodeAttr('#title')
+  ], [
+    new Node('div', [], [new Node('ngFor: {{title}}')]),
+    new Node('ng-container', [
+      new NodeAttr('*ngIf', 'i % 2 === 0'),
+      new NodeAttr('#title')
+    ], [
+      new Node('div', [], [new TextNode('index: {{i}}')]),
+      new Node('div', [], [new TextNode('name: {{item}}')]),
+      new Node('div', [], [new TextNode('ngIf: {{title}}')])
+    ])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.title = 'xxx';
+  this.list = ['Tom', 'Jack', 'David'];
+`;
+```
+
 ```javascript
 function AppComponent_ng_container_2_ng_container_4_Template(rf, ctx) {
   if (rf & 1) {

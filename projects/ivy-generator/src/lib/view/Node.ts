@@ -330,17 +330,19 @@ export class Node {
     if (view.name === 'ng-template') {
       const refParamsStr = this.gRefParams(view);
       const refParamsIndex = view._rootNode.getConstsIndex(refParamsStr);
+
       const attrs = view._templateAttrs.filter((attr: NodeAttr) => {
         return attr._type === 'attr';
       }).reduce((arr, attr) => {
         arr.push(attr.name, '');
         return arr;
       }, []);
-      const attrParamsIndex = view._rootNode.getConstsIndex(attrs.length > 0 ? JSON.stringify(attrs) : 'undefined');
 
       if (view._bindAttrs.length > 0) {
         attrs.push(<any>3, ...view._bindAttrs.map(a => a.name));
       }
+
+      const attrParamsIndex = view._rootNode.getConstsIndex(attrs.length > 0 ? JSON.stringify(attrs) : 'undefined');
       const refExtractorParam = refParamsStr !== 'undefined' ? `${apiPath_p}.ng_ɵɵtemplateRefExtractor` : 'undefined';
       return prefix + `'ng-template',${attrParamsIndex},${refParamsIndex},${refExtractorParam});\n`;
     } else {
@@ -388,7 +390,7 @@ export class Node {
       }
       initCodes.push(`${apiPath_p}.ng_ɵɵprojection(${node._index} , ${rootNode._ngContentIndex++} , ${selectorParams});`);
     } else {
-      if (node.children.length > 0) {
+      if (node.children.length > 0 || node._eventAttrs.length > 0) {
         initCodes.push(`${apiPath_p}.ng_ɵɵelementStart(${node._index} , '${node.name}' , ${attrParamsIndex} , ${refParamsIndex});\n`);
 
         this.compileListeners(node, contextNode);
