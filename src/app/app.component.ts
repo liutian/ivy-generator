@@ -1,8 +1,8 @@
 import { Component, ViewContainerRef, ComponentFactoryResolver, OnInit } from '@angular/core';
 import {
-  CodeFactory, Component as IvyComponent, NodeAttr, Node,
+  CodeFactory, ComponentDef, NodeAttr, Node,
   TextNode, Input as IvyInput, Output as IvyOutput, HostBind as IvyHostBind
-} from '@baozun/ivy-generator';
+} from 'ivy-generator';
 import { apis } from './api';
 
 @Component({
@@ -46,14 +46,14 @@ export class AppComponent implements OnInit {
     const input = new Node('input', [new NodeAttr('[(ngModel)]', 'newName')]);
     const addBtn = new Node('button', [new NodeAttr('(click)', 'onAdd()')], [new TextNode('add')]);
 
-    const employeeListComponent = new IvyComponent(componentName, [
+    const employeeListComponentDef = new ComponentDef(componentName, [
       input, addBtn, list
     ]);
 
-    employeeListComponent.classConstructor = `
+    employeeListComponentDef.classConstructor = `
       this.list = ['Tom','Jack','David'];
     `;
-    employeeListComponent.classMethods = [
+    employeeListComponentDef.classMethods = [
       `
       onAdd() {
         if (!this.newName || !this.newName.trim()) {
@@ -75,13 +75,13 @@ export class AppComponent implements OnInit {
       `
     ];
 
-    const employeeListDef = factory._createComponent(employeeListComponent);
+    const employeeListDef = factory._createComponent(employeeListComponentDef);
 
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(employeeListDef);
     this.viewContainerRef.createComponent(componentFactory);
 
     // tslint:disable-next-line:no-console
-    console.log(`EmployeeList sourceCodes:\n${employeeListComponent._sourceCodes}`);
+    console.log(`EmployeeList sourceCodes:\n${employeeListComponentDef._sourceCodes}`);
     // tslint:disable-next-line:no-console
     console.log(`Employee sourceCodes:\n${employeeComponent._sourceCodes}`);
   }
@@ -116,7 +116,7 @@ export class AppComponent implements OnInit {
       new NodeAttr('(click)', 'editing = false;')
     ], [new TextNode('cancel')]);
 
-    const employeeComponent = new IvyComponent('Employee', [
+    const employeeComponent = new ComponentDef('Employee', [
       text, input, editBtn, removeBtn, okBtn, cancelBtn
     ]);
 
