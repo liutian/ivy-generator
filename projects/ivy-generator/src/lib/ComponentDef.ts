@@ -8,7 +8,7 @@ import { Node } from './view/Node';
 import { HostListener } from './decorator/HostListener';
 import { componentName_p, apiPath_p } from './key';
 
-export class Component {
+export class ComponentDef {
 
   parentClass: string;
   dependencies: ClassDep[] = [];
@@ -110,19 +110,21 @@ export class Component {
     }).join(',');
 
     return `
-    ${componentName_p}.ngComponentDef = ${apiPath_p}.ng_ɵɵdefineComponent({
+    ${componentName_p}.ɵfac = function ${componentName_p}_Factory(t){
+      return new (t || ${componentName_p})(${this.dependencies.map(classDep => classDep.gCode()).join(',')});
+    };
+
+    ${componentName_p}.ɵcmp = ${apiPath_p}.ng_ɵɵdefineComponent({
       type: ${componentName_p},
       selectors: ${JSON.stringify([this.selector.split(',')])},
-      factory: function ${componentName_p}_Factory(t){
-        return new (t || ${componentName_p})(${this.dependencies.map(classDep => classDep.gCode()).join(',')});
-      },
       template: function ${componentName_p}_Template(rf,ctx){
         ${initCodeStr}
         ${refreshCodeStr}
       },
       ${this.rootNode._ngContentSelectorsStr ? 'ngContentSelectors: ' + this.rootNode._ngContentSelectorsStr + ',' : ''}
-      consts: ${this.rootNode._consts},
+      decls: ${this.rootNode._decls},
       vars: ${this.rootNode.getVars()},
+      consts: [${this.rootNode._constsStr.join(',')}],
       directives: [${directives}],
       pipes: [${pipes}],
       encapsulation: 2,
@@ -146,11 +148,11 @@ export class Component {
       contentQueriesStr = `
       contentQueries: function ${componentName_p}_ContentQueries(rf,ctx,dirIndex){
         if(rf & 1){
-          ${list.map(q => q.gInitCode())}
+          ${list.map(q => q.gInitCode()).join('')}
         }
         if(rf & 2){
           let _t;
-          ${list.map(q => q.gRefreshCode())}
+          ${list.map(q => q.gRefreshCode()).join('')}
         }
       },`;
     }
@@ -160,10 +162,10 @@ export class Component {
       viewQueryStr = `
       viewQuery: function ${componentName_p}_Query(rf,ctx){
         if(rf & 1){
-          ${list.map(q => q.gInitCode())}
+          ${list.map(q => q.gInitCode()).join('')}
         }
         if(rf & 2){
-          ${list.map(q => q.gRefreshCode())}
+          ${list.map(q => q.gRefreshCode()).join('')}
         }
       },`;
     }
@@ -217,19 +219,16 @@ export class Component {
     return `
       hostBindings: function ${componentName_p}_HostBindings(rf,ctx,elIndex){
         if (rf & 1){
-          ${apiPath_p}.ng_ɵɵallocHostVars(${hostBindList.length});
           ${hostListenerStr}
-          ${styling ? apiPath_p + '.ng_ɵɵstyling();' : ''}
         }
         if(rf & 2){
           ${hostRefreshStr}
-          ${styling ? apiPath_p + '.ng_ɵɵstylingApply();' : ''}
         }
       },\n`;
   }
 
   private detectFeatures() {
-    let features = '[';
+    let features = '';
 
     if (Array.isArray(this.classMethods)) {
       const hasChanges = this.classMethods.some(method => {
@@ -240,6 +239,6 @@ export class Component {
       }
     }
 
-    return features + ']';
+    return `[${features}]`;
   }
 }

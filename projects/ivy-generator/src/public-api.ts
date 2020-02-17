@@ -3,7 +3,7 @@
  */
 
 export * from './lib/CodeFactory';
-export * from './lib/Component';
+export * from './lib/ComponentDef';
 export * from './lib/ClassDep';
 export * from './lib/view/Node';
 export * from './lib/view/NodeAttr';
@@ -15,5 +15,6 @@ export * from './lib/decorator/HostListener';
 export * from './lib/decorator/Input';
 export * from './lib/decorator/Output';
 export * from './lib/decorator/ViewQuery';
+export * from './lib/key';
 
 // export * from './lib/api';

@@ -42,7 +42,7 @@ export class NodeAttr {
     }
   }
 
-  static preStructAttr(attr: NodeAttr): NodeAttr[] {
+  static detectStructAttr(attr: NodeAttr): NodeAttr[] {
     const attrs = [];
 
     (attr.value || '').split(';').map(expr => expr.trim()).forEach((expr) => {
@@ -69,7 +69,7 @@ export class NodeAttr {
     return attrs;
   }
 
-  static preAttrs(attrs: NodeAttr[], pipeMap: Map<string, string[]>) {
+  static detectAttrs(attrs: NodeAttr[], pipeMap: Map<string, string[]>) {
     const bindAttrs: NodeAttr[] = [];
     const refAttrs: NodeAttr[] = [];
     const normalAttrs: NodeAttr[] = [];
@@ -86,7 +86,7 @@ export class NodeAttr {
           throw new Error('structAttr must be only one');
         }
         structAttr = attr;
-        structAttrList = NodeAttr.preStructAttr(attr);
+        structAttrList = NodeAttr.detectStructAttr(attr);
       } else if (attr._type === 'binding') {
         if (validValue(attr.value, attr.rawName)) {
           bindAttrs.push(attr);
@@ -160,7 +160,7 @@ export class NodeAttr {
     return directives;
   }
 
-  static fetchAttrsForTemplateNode(attrs: NodeAttr[]) {
+  static detectAttrsForTemplateNode(attrs: NodeAttr[]) {
     const declareVars = {};
     const templateAttrs = [];
     const bindAttrs = [];
@@ -188,11 +188,11 @@ export class NodeAttr {
   }
 
   static compare(a: NodeAttr, b: NodeAttr) {
-    const aStyling = a.name.startsWith('style') || a.name.startsWith('class');
-    const bStyling = b.name.startsWith('style') || b.name.startsWith('class');
-    if (aStyling && !bStyling) {
+    const aIsStyle = a.name.startsWith('style') || a.name.startsWith('class');
+    const bIsStyle = b.name.startsWith('style') || b.name.startsWith('class');
+    if (aIsStyle && !bIsStyle) {
       return 1;
-    } else if (!aStyling && bStyling) {
+    } else if (!aIsStyle && bIsStyle) {
       return -1;
     } else {
       return 0;

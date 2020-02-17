@@ -1,14 +1,65 @@
 
 ### 常用数据
-- `consts` 静态内容的数量，包括普通dom节点（元素和文本），模板变量，文本插值中的管道，ng-template
+- `decls` 静态内容的数量，包括普通dom节点（元素和文本），模板变量，文本插值中的管道，ng-template
 - `vars` 动态内容的数量，包括属性绑定，双向绑定，文本插值数量和文本插值中用到的管道（x2）以及管道的参数，ng-template
 - `index` dom节点，模板变量，管道在模板中位置索引
-- `ɵɵpipeBindX(index,slotOffset)` 插值表达式中使用管道，index:管道的索引，slotOffset:数据偏移量，该值为组件范围内上一次使用的偏移量 + 上一次函数的管道参数（不包括第一个参数） + 2，该字段初始值为
+- `ɵɵpipeBindX(index,slotOffset)` 插值表达式中使用管道，index:管道的索引，slotOffset:数据偏移量，该值为组件范围内上一次使用的偏移量 + 上一次函数的管道参数（不包括第一个参数） + 2，该字段初始值为差值文本出现的个数
 
 *** 表达式中不能出现字面量值，例如：{'xx':yy}
 *** ng-content不能嵌套在ng-template或者结构性指令中时会有问题
 *** 禁止style.xxx.yyy
 *** 禁止style.lineHeight,使用style.line-height代替
+
+
+### example
+```typescript
+export const apis: API = {
+  // angular ivy api需要事先枚举引用
+  ng_ɵɵelementStart: ɵɵelementStart,
+  ng_ɵɵelementEnd: ɵɵelementEnd,
+  ng_ɵɵtext: ɵɵtext,
+  ng_ɵɵlistener: ɵɵlistener,
+  ...
+  // 组件中使用的指令，组件，管道，服务需要事先枚举引用
+  ng_NgForOf: NgForOf,
+  ng_NgIf: NgIf,
+  ng_NgModel: NgModel,
+  ng_DefaultValueAccessor: DefaultValueAccessor,
+  ng_NgControlStatus: NgControlStatus,
+}
+
+(<any>window).gc_apis = apis;
+
+const directiveMap = new Map();
+const pipeMap = new Map();
+const componentMap = new Map();
+directiveMap.set('ngForOf', ['ng_NgForOf']);
+directiveMap.set('ngIf', ['ng_NgIf']);
+directiveMap.set('ngModel', ['ng_NgModel', 'ng_DefaultValueAccessor', 'ng_NgControlStatus']);
+
+const factory = new CodeFactory(componentMap, directiveMap, pipeMap, {
+  // 可省略默认配置项
+  namespace: 'gc',
+  apiPath: 'window.gc_apis'
+});
+
+// 定义模板节点
+const containerNode = new Node('div', [], [
+  new TextNode('Hello world!')
+]);
+
+// 创建组件定义对象
+const demoComponentDef = new ComponentDef('Demo', [
+  containerNode
+]);
+
+// 创建组件模型
+const demoComponent = factory._createComponent(demoComponentDef);
+
+// 将组件模型载入视图
+const componentFactory = this.componentFactoryResolver.resolveComponentFactory(demoComponent);
+viewContainerRef.createComponent(componentFactory);
+```
 
 ### 元素嵌套
 ```html
@@ -21,8 +72,24 @@
   </ul>
 </div>
 ```
+
+usage
+```typescript
+const containerNode = new Node('div', [], [
+  new Node('h3', [], [
+    new TextNode('employee list')
+  ]),
+  new Node('ul', [], [
+    new Node('li', [], [new TextNode('Tom')]),
+    new Node('li', [], [new TextNode('Jack')]),
+    new Node('li', [], [new TextNode('David')])
+  ])
+]);
+```
+
+compile
 ```javascript
-consts: 10
+decls: 10
 vars: 0
 
 template: function AppComponent_Template(rf, ctx) {
@@ -53,13 +120,25 @@ template: function AppComponent_Template(rf, ctx) {
 ```html
 <input type="text" name="newName" maxlength="10">
 ```
+
+usage
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10')
+]);
+```
+
+compile
 ```javascript
-consts: 1
+consts: [["type", "text", "name", "newName", "maxlength", "10"]],
+decls: 1
 vars: 0
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelement"](0, "input", ["type", "text", "name", "newName", "maxlength", "10"]);
+    ng["ɵɵelement"](0, "input", 0);
   }
 }
 ```
@@ -70,6 +149,26 @@ template: function AppComponent_Template(rf, ctx) {
 ```html
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder">
 ```
+
+usage
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10'),
+  new NodeAttr('[placeholder]', 'placeholder')
+]);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  inputNode
+]);
+
+demoComponentDef.classConstructor = `
+  this.placeholder = 'please input new name';
+`;
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -77,12 +176,13 @@ class AppComponent {
   }
 }
 
-consts: 1
+consts: [["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder"]]
+decls: 1
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelement"](0, "input", ["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder"]);
+    ng["ɵɵelement"](0, "input", 0);
   }
   if (rf & 2) {
     ng["ɵɵproperty"]("placeholder", ctx.placeholder);
@@ -96,6 +196,33 @@ template: function AppComponent_Template(rf, ctx) {
 ```html
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder" (blur)="onBlur()">
 ```
+
+usage
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10'),
+  new NodeAttr('[placeholder]', 'placeholder'),
+  new NodeAttr('(blur)', 'onBlur()')
+]);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  inputNode
+]);
+
+demoComponentDef.classConstructor = `
+  this.placeholder = 'please input new name';
+`;
+
+demoComponentDef.classMethods = [
+  `onBlur(){
+    alert('input new name');
+  }`
+];
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -103,16 +230,17 @@ class AppComponent {
   }
 
   onBlur(){
-    alert(`input new name`);
+    alert('input new name');
   }
 }
 
-consts: 1
+consts: [["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "blur"]]
+decls: 1
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelementStart"](0, "input", ["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "blur"]);
+    ng["ɵɵelementStart"](0, "input", 0);
     ng["ɵɵlistener"]("blur", function AppComponent_Template_input_blur_0_listener($event) { return ctx.onBlur(); });
     ng["ɵɵelementEnd"]();
   }
@@ -129,6 +257,34 @@ template: function AppComponent_Template(rf, ctx) {
 <input type="text" name="newName" maxlength="10" [placeholder]="placeholder" (blur)="onBlur()" [(ngModel)]="newName">
 {{newName}}
 ```
+
+usage
+```typescript
+const inputNode = new Node('input', [
+  new NodeAttr('type', 'text'),
+  new NodeAttr('name', 'newName'),
+  new NodeAttr('maxlength', '10'),
+  new NodeAttr('[placeholder]', 'placeholder'),
+  new NodeAttr('(blur)', 'onBlur()'),
+  new NodeAttr('[(ngModel)]', 'newName')
+]);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  inputNode, new TextNode('{{newName}}')
+]);
+
+demoComponentDef.classConstructor = `
+  this.placeholder = 'please input new name';
+`;
+
+demoComponentDef.classMethods = [
+  `onBlur(){
+    alert('input new name');
+  }`
+];
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor(){
@@ -140,12 +296,13 @@ class AppComponent {
   }
 }
 
-consts: 2
+consts: [["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "ngModel", "blur", "ngModelChange"]]
+decls: 2
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng["ɵɵelementStart"](0, "input", ["type", "text", "name", "newName", "maxlength", "10", 3, "placeholder", "ngModel", "blur", "ngModelChange"]);
+    ng["ɵɵelementStart"](0, "input", 0);
     ng["ɵɵlistener"]("blur", function AppComponent_Template_input_blur_0_listener($event) { return ctx.onBlur(); });
     ng["ɵɵlistener"]("ngModelChange", function AppComponent_Template_input_ngModelChange_0_listener($event) { return ctx.newName = $event; });
     ng["ɵɵelementEnd"]();
@@ -153,7 +310,7 @@ template: function AppComponent_Template(rf, ctx) {
   }
   if (rf & 2) {
     ng["ɵɵproperty"]("placeholder", ctx.placeholder)("ngModel", ctx.newName);
-    ng["ɵɵselect"](1);
+    ng["ɵɵadvance"](1);
     ng["ɵɵtextInterpolate1"]("", ctx.newName, "\n");
   }
 }
@@ -167,16 +324,35 @@ directives: [
 
 ### 文本节点多个差值多个管道多个参数
 ```html
-placeholder:{{placeholder}}>{{placeholder | lowercase | titlecase | slice:2:10}}==={{'please input new name' | lowercase | titlecase | slice:2:10}}
+text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}
 ```
+
+usage
+```typescript
+pipeMap.set('lowercase', ['ng_LowerCasePipe']);
+pipeMap.set('titlecase', ['ng_TitleCasePipe']);
+pipeMap.set('slice', ['ng_SlicePipe']);
+
+const factory = new CodeFactory(componentMap, directiveMap, pipeMap);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  new TextNode("text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}")
+]);
+
+demoComponentDef.classConstructor = `
+  this.text = 'hello world';
+`;
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor(){
-    this.placeholder = 'please input new name';
+    this.text = 'hello world';
   }
 }
 
-consts: 7
+decls: 7
 vars: 19
 
 template: function AppComponent_Template(rf, ctx) {
@@ -190,13 +366,13 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵpipe"](6, "lowercase");
   } if (rf & 2) {
     ng_["ɵɵtextInterpolate3"](
-      "placeholder:", 
+      "text:", 
       ctx.placeholder, 
-      ">", 
+      " || ", 
       ng_["ɵɵpipeBind3"](1, 3, ng_["ɵɵpipeBind1"](2, 7, ng_["ɵɵpipeBind1"](3, 9, ctx.placeholder)), 2, 10), 
-      "===", 
-      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "please input new name")), 2, 10), 
-      "\n"
+      " || ", 
+      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "hello world")), 2, 10), 
+      " "
       );
   }
 }
@@ -211,22 +387,45 @@ pipes: [
 
 ### 属性多个差值多个管道多个参数
 ```html
-<input type="text"
-  placeholder="placeholder:{{placeholder}}>{{placeholder | lowercase | titlecase | slice:2:10}}==={{'please input new name' | lowercase | titlecase | slice:2:10}}">
+  <input type="text"
+  placeholder="text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}">
 ```
+
+usage
+```typescript
+pipeMap.set('lowercase', ['ng_LowerCasePipe']);
+pipeMap.set('titlecase', ['ng_TitleCasePipe']);
+pipeMap.set('slice', ['ng_SlicePipe']);
+
+const factory = new CodeFactory(componentMap, directiveMap, pipeMap);
+
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('input', [
+    new NodeAttr('type', 'text'),
+    new NodeAttr('placeholder', "text:{{text}} || {{text | lowercase | titlecase | slice:2:10}} || {{'hello world' | lowercase | titlecase | slice:2:10}}")
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.text = 'hello world';
+`;
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor(){
-    this.placeholder = 'please input new name';
+    this.text = 'hello world';
   }
 }
 
-consts: 7
+consts: [["type", "text", 3, "placeholder"]]
+decls: 7
 vars: 19
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelement"](0, "input", ["type", "text", 3, "placeholder"]);
+    ng_["ɵɵelement"](0, "input", 0);
     ng_["ɵɵpipe"](1, "slice");
     ng_["ɵɵpipe"](2, "titlecase");
     ng_["ɵɵpipe"](3, "lowercase");
@@ -236,12 +435,12 @@ template: function AppComponent_Template(rf, ctx) {
   } if (rf & 2) {
     ng_["ɵɵpropertyInterpolate3"](
       "placeholder", 
-      "placeholder:", 
-      ctx.placeholder, 
-      ">", 
+      "text:", 
+      ctx.text, 
+      " || ", 
       ng_["ɵɵpipeBind3"](1, 3, ng_["ɵɵpipeBind1"](2, 7, ng_["ɵɵpipeBind1"](3, 9, ctx.placeholder)), 2, 10), 
-      "===", 
-      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "please input new name")), 2, 10), 
+      " || ", 
+      ng_["ɵɵpipeBind3"](4, 11, ng_["ɵɵpipeBind1"](5, 15, ng_["ɵɵpipeBind1"](6, 17, "hello world")), 2, 10), 
       ""
       );
   }
@@ -258,30 +457,54 @@ pipes: [
 ### *ngIf
 ```html
 <button (click)="show = !show">toggle</button>
-<div *ngIf="show">text...</div>
+<div *ngIf="show">
+  <a href="http://www.google.com">link...</a>
+</div>
 ```
+
+usage
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('button', [
+    new NodeAttr('(click)', 'show = !show')
+  ], [new TextNode('toggle')]),
+  new Node('div', [
+    new NodeAttr('*ngIf', 'show')
+  ], [
+    new Node('a', [new NodeAttr('href', 'http://www.google.com')], [new TextNode('link...')])
+  ])
+]);
+```
+
+compile
 ```javascript
 function AppComponent_div_2_Template(rf, ctx) {
-    if (rf & 1) {
-        ng_["ɵɵelementStart"](0, "div");
-        ng_["ɵɵtext"](1, "text...");
-        ng_["ɵɵelementEnd"]();
-    }
+  if (rf & 1) {
+    ng_["ɵɵelementStart"](0, "div");
+    ng_["ɵɵelementStart"](1, "a", 2);
+    ng_["ɵɵtext"](2, "link...");
+    ng_["ɵɵelementEnd"]();
+    ng_["ɵɵelementEnd"]();
+  }
 }
 
-consts: 3
+consts: [[3, "click"], [4, "ngIf"], ["href", "http://www.google.com"]]
+decls: 3
 vars: 1
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementStart"](0, "button", [3,"click"]);
-    ng_["ɵɵlistener"]("click", function AppComponent_Template_button_click_0_listener($event) { return ctx.show = !ctx.show; });
-    ng_["ɵɵtext"](1, "toggle");
-    ng_["ɵɵelementEnd"]();
-    ng_["ɵɵtemplate"](2, AppComponent_div_2_Template, 2, 0, "div", [4,"ngIf"]);
-  } if (rf & 2) {
-    ng_["ɵɵselect"](2);
-    ng_["ɵɵproperty"]("ngIf", ctx.show);
+      ng_["ɵɵelementStart"](0, "button", 0);
+      ng_["ɵɵlistener"]("click", function AppComponent_Template_button_click_0_listener($event) {
+          return ctx.show = !ctx.show;
+      });
+      ng_["ɵɵtext"](1, "toggle");
+      ng_["ɵɵelementEnd"]();
+      ng_["ɵɵtemplate"](2, AppComponent_div_2_Template, 3, 0, "div", 1);
+  }
+  if (rf & 2) {
+      ng_["ɵɵadvance"](2);
+      ng_["ɵɵproperty"]("ngIf", ctx.show);
   }
 }
 directives: [ng["NgIf"]]
@@ -293,13 +516,43 @@ directives: [ng["NgIf"]]
 ```html
 {{title}}
 <ul>
-  <li *ngFor="let item of list;let i = index;trackBy: trackById" #title>{{title}} --- {{item}} --- {{i}}</li>
+  <li *ngFor="let item of list;let i = index;trackBy: trackById" #refLi>
+  {{refLi}} --- {{item}} --- {{i}}
+  </li>
 </ul>
 ```
+
+usage
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new TextNode('{{title}}'),
+  new Node('ul', [], [
+    new Node('li', [
+      new NodeAttr('*ngFor', 'let item of list;let i = index;trackBy: trackById'),
+      new NodeAttr('#refLi')
+    ], [new TextNode('{{refLi}} --- {{item}} --- {{i}}')])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.title = 'xxx';
+  this.list = ['tom', 'jack', 'david'];
+`;
+
+demoComponentDef.classMethods = [
+  `
+    trackById(index,item) {
+      return item;
+    }
+  `
+];
+```
+
+compile
 ```javascript
 function AppComponent_li_2_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementStart"](0, "li", null, ["title", ""]);
+    ng_["ɵɵelementStart"](0, "li", null, 1);
     ng_["ɵɵtext"](2);
     ng_["ɵɵelementEnd"]();
   } 
@@ -307,7 +560,7 @@ function AppComponent_li_2_Template(rf, ctx) {
     const item_r1 = ctx.$implicit;
     const i_r2 = ctx.index;
     const _r3 = ng_["ɵɵreference"](1);
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵtextInterpolate3"]("", _r3, " --- ", item_r1, " --- ", i_r2, "");
   }
 }
@@ -322,19 +575,20 @@ class AppComponent {
   }
 }
 
-consts: 3
+consts: [[4, "ngFor", "ngForOf", "ngForTrackBy"], ["refLi", ""]]
+decls: 3
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵtext"](0);
     ng_["ɵɵelementStart"](1, "ul");
-    ng_["ɵɵtemplate"](2, AppComponent_li_2_Template, 3, 3, "li", [4, "ngFor", "ngForOf", "ngForTrackBy"]);
+    ng_["ɵɵtemplate"](2, AppComponent_li_2_Template, 3, 3, "li", 0);
     ng_["ɵɵelementEnd"]();
   } 
   if (rf & 2) {
-    ng_["ɵɵtextInterpolate1"]("", ctx.title, "\n");
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵtextInterpolate1"](" ", ctx.title, " ");
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngForOf", ctx.list)("ngForTrackBy", ctx.trackById);
   }
 }, 
@@ -350,6 +604,19 @@ class AppComponent implements OnChanges{
   }
 }
 ```
+
+usage
+```typescript
+demoComponentDef.classMethods = [
+  `
+  ngOnChanges(changes) {
+    console.log('changes...');
+  }
+  `
+]
+```
+
+compile
 ```javascript
 class AppComponent{
   ngOnChanges(changes) {
@@ -372,23 +639,39 @@ class AppComponent {
   @ContentChild('content-one', { static: true }) content4;
 }
 ```
+
+usage
+```typescript
+(<any>window).gc_apis = apis;
+
+(apis as any).ct_ContentTypeA = ContentTypeA;
+(apis as any).ct_ContentTypeB = ContentTypeB;
+(apis as any).ct_ContentReadTypeA = ContentReadTypeA;
+(apis as any).ct_ContentReadTypeB = ContentReadTypeB;
+
+demoComponentDef.contentQueries = [
+  new ContentQuery(false, 'contents', 'content1'),
+  new ContentQuery(false, `@${apiPath_p}.ct_ContentTypeA`, 'content2', { read: `${apiPath_p}.ct_ContentReadTypeA`, descendants: true }),
+  new ContentQuery(true, `@${apiPath_p}.ct_ContentTypeB`, 'content3', { read: `${apiPath_p}.ct_ContentReadTypeB`, static: false }),
+  new ContentQuery(true, 'content-one', 'content4', { static: true })
+]
+```
+
+compile
 ```javascript
-class AppComponent {
-
-}
-
 contentQueries: function AppComponent_ContentQueries(rf, ctx, dirIndex) {
   if (rf & 1) {
     ng_["ɵɵcontentQuery"](dirIndex, ContentTypeB, true, ContentReadTypeB);
     ng_["ɵɵstaticContentQuery"](dirIndex, ["content-one"], true);
     ng_["ɵɵcontentQuery"](dirIndex, ["contents"], false);
     ng_["ɵɵcontentQuery"](dirIndex, ContentTypeA, true, ContentReadTypeA);
-  } if (rf & 2) {
+  } 
+  if (rf & 2) {
     var _t;
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content3 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content4 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content1 = _t);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadContentQuery"]())) && (ctx.content2 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content3 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content4 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content1 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.content2 = _t);
   }
 },
 ```
@@ -403,6 +686,25 @@ class AppComponent {
   @ViewChild('view-one', { static: true }) view4;
 }
 ```
+
+usage
+```typescript
+(<any>window).gc_apis = apis;
+
+(apis as any).ct_ViewTypeA = ViewTypeA;
+(apis as any).ct_ViewTypeB = ViewTypeB;
+(apis as any).ct_ViewReadTypeA = ViewReadTypeA;
+(apis as any).ct_ViewReadTypeB = ViewReadTypeB;
+
+demoComponentDef.viewQueries = [
+  new ViewQuery(false, 'views', 'view1'),
+  new ViewQuery(false, `@${apiPath_p}.ct_ViewTypeA`, 'view2', { read: `${apiPath_p}.ct_ViewReadTypeA` }),
+  new ViewQuery(true, `@${apiPath_p}.ct_ViewTypeB`, 'view3', { read: `${apiPath_p}.ct_ViewReadTypeB`, static: false }),
+  new ViewQuery(true, 'view-one', 'view4', { static: true })
+]
+```
+
+compile
 ```javascript
 viewQuery: function AppComponent_Query(rf, ctx) {
   if (rf & 1) {
@@ -413,13 +715,14 @@ viewQuery: function AppComponent_Query(rf, ctx) {
   }
   if (rf & 2) {
     var _t;
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view3 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view4 = _t.first);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view1 = _t);
-    ng_["ɵɵqueryRefresh"]((_t = ng_["ɵɵloadViewQuery"]())) && (ctx.view2 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view3 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view4 = _t.first);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view1 = _t);
+    ng_["ɵɵqueryRefresh"](_t = ng_["ɵɵloadQuery"]()) && (ctx.view2 = _t);
   }
 }
 ```
+
 
 ### constructor 依赖注入
 ```typescript
@@ -433,6 +736,21 @@ class AppComponent {
   }
 }
 ```
+
+usage
+```typescript
+(apis as any).ct_DemoService = DemoService;
+
+demoComponentDef.dependencies = [
+  new ClassDep('httpClient', `${apiPath_p}.ng_HttpClient`),
+  new ClassDep('injector', `${apiPath_p}.ng_Injector`, ['Optional', 'SkipSelf']),
+  new ClassDep('appBaseHref', `${apiPath_p}.ng_APP_BASE_HREF`, ['Optional']),
+  new ClassDep('elementRef', `${apiPath_p}.ng_ElementRef`, ['Optional', 'Self']),
+  new ClassDep('demoService', `${apiPath_p}.ct_DemoService`, ['Optional'])
+]
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor(httpClient, injector, appBaseHref, elementRef, demoService) {
@@ -444,8 +762,7 @@ class AppComponent {
   }
 }
 
-
-factory: function AppComponent_Factory(t) {
+AppComponent.ɵfac: function AppComponent_Factory(t) {
   return new (t || AppComponent)(
       ng_["ɵɵdirectiveInject"](ng_["HttpClient"]),
       ng_["ɵɵdirectiveInject"](ng_["Injector"], 12),
@@ -466,6 +783,36 @@ factory: function AppComponent_Factory(t) {
   </li>
 </ul>
 ```
+```typescript 
+class AppComponent {
+  name = '111';
+  list = ['xxx']
+}
+```
+
+usage --- 异常
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('input', [
+    new NodeAttr('type', 'text'),
+    new NodeAttr('[(ngModel)]', 'name'),
+    new NodeAttr('#test', 'ngModel')
+  ]),
+  new TextNode('{{test}}'),
+  new Node('ul', [], [
+    new Node('li', [
+      new NodeAttr('*ngFor', 'let item of list;let test = index')
+    ], [new TextNode('{{test}}')])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.name = '111';
+  this.list = ['xxx'];
+`;
+```
+
+compile
 ```javascript
 function AppComponent_li_4_Template(rf, ctx) {
   if (rf & 1) {
@@ -474,32 +821,33 @@ function AppComponent_li_4_Template(rf, ctx) {
     ng_["ɵɵelementEnd"]();
   } if (rf & 2) {
     const test_r3 = ctx.index;
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵtextInterpolate1"](" ", test_r3, " ");
   }
 }
 
-consts: 5, 
+consts: [["type", "text", 3, "ngModel", "ngModelChange"], ["test", "ngModel"], [4, "ngFor", "ngForOf"]]
+decls: 5, 
 vars: 3,
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementStart"](0, "input", ["type", "text", 3, "ngModel", "ngModelChange"], ["test", "ngModel"]);
+    ng_["ɵɵelementStart"](0, "input", 0, 1);
     ng_["ɵɵlistener"]("ngModelChange", function AppComponent_Template_input_ngModelChange_0_listener($event) { 
       return ctx.name = $event; 
     });
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵtext"](2);
     ng_["ɵɵelementStart"](3, "ul");
-    ng_["ɵɵtemplate"](4, AppComponent_li_4_Template, 2, 1, "li", [4, "ngFor", "ngForOf"]);
+    ng_["ɵɵtemplate"](4, AppComponent_li_4_Template, 2, 1, "li", 2);
     ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
     const _r0 = ng_["ɵɵreference"](1);
     ng_["ɵɵproperty"]("ngModel", ctx.name);
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵtextInterpolate1"]("\n", _r0, "\n");
-    ng_["ɵɵselect"](4);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngForOf", ctx.list);
   }
 },
@@ -529,6 +877,40 @@ class AppComponent {
   }
 }
 ```
+
+usage
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new TextNode('{{title}}'),
+  new Node('ng-template', [
+    new NodeAttr('ngFor'),
+    new NodeAttr('let-item'),
+    new NodeAttr('[ngForOf]', 'list'),
+    new NodeAttr('let-i', 'index'),
+    new NodeAttr('[ngForTrackBy]', 'trackById'),
+    new NodeAttr('#title')
+  ], [
+    new Node('span', [], [
+      new TextNode('{{title}} --- {{item}} --- {{i}}')
+    ])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.title = 'xxx';
+  this.list = ['Tom', 'Jack', 'David'];
+`;
+
+demoComponentDef.classMethods = [
+  `
+  trackById(index, item) {
+    return item;
+  }
+  `
+]
+```
+
+compile
 ```javascript
 function AppComponent_ng_template_1_Template(rf, ctx) { 
   if (rf & 1) {
@@ -541,7 +923,7 @@ function AppComponent_ng_template_1_Template(rf, ctx) {
     const i_r3 = ctx.index;
     ng_["ɵɵnextContext"]();
     const _r0 = ng_["ɵɵreference"](2);
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵtextInterpolate3"]("", _r0, " --- ", item_r2, " --- ", i_r3, "");
   } 
 }
@@ -556,18 +938,19 @@ class AppComponent {
   }
 }
 
-consts: 3
+consts: [["ngFor", "", 3, "ngForOf", "ngForTrackBy"], ["title", ""]]
+decls: 3
 vars: 3
 
 template: function AppComponent_Template(rf, ctx) { 
   if (rf & 1) {
     ng_["ɵɵtext"](0);
-    ng_["ɵɵtemplate"](1, AppComponent_ng_template_1_Template, 2, 3, "ng-template", ["ngFor", "", 3, "ngForOf", "ngForTrackBy"], ["title", ""], ng_["ɵɵtemplateRefExtractor"]);
+    ng_["ɵɵtemplate"](1, AppComponent_ng_template_1_Template, 2, 3, "ng-template", 0, 1, ng_["ɵɵtemplateRefExtractor"]);
   } 
   if (rf & 2) {
     const _r0 = ng_["ɵɵreference"](2);
     ng_["ɵɵtextInterpolate1"]("", _r0, "\n");
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵproperty"]("ngForOf", ctx.list)("ngForTrackBy", ctx.trackById);
   }
 }
@@ -588,6 +971,34 @@ directives: [ng_["NgForOf"]],
   </ng-container>
 </ng-container>
 ```
+
+```typescript  --- 异常
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('div', [], [
+    new TextNode('head: {{title}}')
+  ]),
+  new Node('ng-container', [
+    new NodeAttr('*ngFor', 'let item of list;let i = index;'),
+    new NodeAttr('#title')
+  ], [
+    new Node('div', [], [new Node('ngFor: {{title}}')]),
+    new Node('ng-container', [
+      new NodeAttr('*ngIf', 'i % 2 === 0'),
+      new NodeAttr('#title')
+    ], [
+      new Node('div', [], [new TextNode('index: {{i}}')]),
+      new Node('div', [], [new TextNode('name: {{item}}')]),
+      new Node('div', [], [new TextNode('ngIf: {{title}}')])
+    ])
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.title = 'xxx';
+  this.list = ['Tom', 'Jack', 'David'];
+`;
+```
+
 ```javascript
 function AppComponent_ng_container_2_ng_container_4_Template(rf, ctx) {
   if (rf & 1) {
@@ -607,11 +1018,11 @@ function AppComponent_ng_container_2_ng_container_4_Template(rf, ctx) {
     const ctx_r6 = ng_["ɵɵnextContext"]();
     const i_r2 = ctx_r6.index;
     const item_r1 = ctx_r6.$implicit;
-    ng_["ɵɵselect"](3);
+    ng_["ɵɵadvance"](3);
     ng_["ɵɵtextInterpolate1"]("index: ", i_r2, "");
-    ng_["ɵɵselect"](5);
+    ng_["ɵɵadvance"](5);
     ng_["ɵɵtextInterpolate1"]("name: ", item_r1, "");
-    ng_["ɵɵselect"](7);
+    ng_["ɵɵadvance"](7);
     ng_["ɵɵtextInterpolate1"]("ngIf: ", _r5, "");
   }
 }
@@ -626,14 +1037,14 @@ function AppComponent_ng_container_2_Template(rf, ctx) {
   } if (rf & 2) {
     const i_r2 = ctx.index;
     const _r3 = ng_["ɵɵreference"](1);
-    ng_["ɵɵselect"](3);
+    ng_["ɵɵadvance"](3);
     ng_["ɵɵtextInterpolate1"]("ngFor: ", _r3, "");
-    ng_["ɵɵselect"](4);
+    ng_["ɵɵadvance"](4);
     ng_["ɵɵproperty"]("ngIf", i_r2 % 2 === 0);
   }
 }
 
-consts: 3
+decls: 3
 vars: 2
 
 
@@ -644,9 +1055,9 @@ template: function AppComponent_Template(rf, ctx) {
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵtemplate"](2, AppComponent_ng_container_2_Template, 5, 2, "ng-container", [4, "ngFor", "ngForOf"]);
   } if (rf & 2) {
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵtextInterpolate1"]("head: ", ctx.title, "");
-    ng_["ɵɵselect"](2);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵproperty"]("ngForOf", ctx.list);
   }
 }, 
@@ -664,7 +1075,7 @@ directives: [
 <div [ngStyle]="styles"></div>
 ```
 ```javascript
-consts: 2
+decls: 2
 vars: 2
 
 template: function AppComponent_Template(rf, ctx) {
@@ -674,7 +1085,7 @@ template: function AppComponent_Template(rf, ctx) {
   } 
   if (rf & 2) {
     ng_["ɵɵproperty"]("ngClass", ctx.cls);
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵproperty"]("ngStyle", ctx.styles);
   }
 },
@@ -695,7 +1106,7 @@ directives: [
 ```
 ```javascript
 ngContentSelectors: ["*", "*", "*"]
-consts: 5
+decls: 5
 vars: 0
 template: function Demo1Component_Template(rf, ctx) {
   if (rf & 1) {
@@ -722,35 +1133,29 @@ template: function Demo1Component_Template(rf, ctx) {
 <div [class.cls2]="cls2"></div>
 ```
 ```javascript
-consts: 7
+decls: 7
 vars: 14
 
 template: function AppComponent_Template(rf, ctx) {
     if (rf & 1) {
         ng_["ɵɵelement"](0, "div", [1, "aaa", "bbb"]);
         ng_["ɵɵelementStart"](1, "div");
-        ng_["ɵɵstyling"]();
         ng_["ɵɵpipe"](2, "slice");
         ng_["ɵɵpipe"](3, "titlecase");
         ng_["ɵɵpipe"](4, "lowercase");
         ng_["ɵɵelementEnd"]();
         ng_["ɵɵelementStart"](5, "div");
-        ng_["ɵɵstyling"]();
         ng_["ɵɵelementEnd"]();
         ng_["ɵɵelementStart"](6, "div");
-        ng_["ɵɵstyling"]();
         ng_["ɵɵelementEnd"]();
     }
     if (rf & 2) {
-        ng_["ɵɵselect"](1);
+        ng_["ɵɵadvance"](1);
         ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 6, ng_["ɵɵpipeBind1"](3, 10, ng_["ɵɵpipeBind1"](4, 12, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff\n  ", ctx.clsc, " ggg");
-        ng_["ɵɵstylingApply"]();
-        ng_["ɵɵselect"](5);
+        ng_["ɵɵadvance"](5);
         ng_["ɵɵclassMap"](ctx.clsd);
-        ng_["ɵɵstylingApply"]();
-        ng_["ɵɵselect"](6);
+        ng_["ɵɵadvance"](6);
         ng_["ɵɵclassProp"]("cls2", ctx.cls2);
-        ng_["ɵɵstylingApply"]();
     }
 },
 pipes: [
@@ -778,7 +1183,6 @@ pipes: [
 function AppComponent_ng_template_6_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵelementStart"](0, "div", [3, "title"]);
-    ng_["ɵɵstyling"]();
     ng_["ɵɵpipe"](1, "slice");
     ng_["ɵɵpipe"](2, "titlecase");
     ng_["ɵɵpipe"](3, "lowercase");
@@ -786,42 +1190,35 @@ function AppComponent_ng_template_6_Template(rf, ctx) {
   } if (rf & 2) {
     const ctx_r0 = ng_["ɵɵnextContext"]();
     ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](1, 5, ng_["ɵɵpipeBind1"](2, 9, ng_["ɵɵpipeBind1"](3, 11, ctx_r0.clsa)), 2, 10), " eee ", ctx_r0.clsb, " fff", ctx_r0.clsc, " ggg");
-    ng_["ɵɵstylingApply"]();
     ng_["ɵɵpropertyInterpolate"]("title", ctx_r0.title);
   }
 }
 
-consts: 8
+decls: 8
 vars: 15
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵelement"](0, "div", [1, "aaa", "bbb"]);
     ng_["ɵɵelementStart"](1, "div", [3, "title"]);
-    ng_["ɵɵstyling"]();
     ng_["ɵɵpipe"](2, "slice");
     ng_["ɵɵpipe"](3, "titlecase");
     ng_["ɵɵpipe"](4, "lowercase");
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵelementStart"](5, "div");
-    ng_["ɵɵstyling"]();
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵtemplate"](6, AppComponent_ng_template_6_Template, 4, 13, "ng-template");
     ng_["ɵɵelementStart"](7, "div");
-    ng_["ɵɵstyling"]();
     ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 7, ng_["ɵɵpipeBind1"](3, 11, ng_["ɵɵpipeBind1"](4, 13, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff", ctx.clsc, " ggg");
-    ng_["ɵɵstylingApply"]();
     ng_["ɵɵpropertyInterpolate"]("title", ctx.title);
-    ng_["ɵɵselect"](5);
+    ng_["ɵɵadvance"](5);
     ng_["ɵɵclassMap"](ctx.clsd);
-    ng_["ɵɵstylingApply"]();
-    ng_["ɵɵselect"](7);
+    ng_["ɵɵadvance"](7);
     ng_["ɵɵclassProp"]("cls2", ctx.cls2);
-    ng_["ɵɵstylingApply"]();
   }
 }
 pipes: [
@@ -839,26 +1236,24 @@ pipes: [
   style.background-color="red{{styleColor| lowercase | titlecase | slice:2:10}}"></div>
 ```
 ```javascript
-consts: 5
+decls: 5
 vars: 12
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵelement"](0, "div", [2, "font-size", "20px", "padding", "10px"]);
     ng_["ɵɵelementStart"](1, "div", [2, "font-size", "20px", "padding", "10px"]);
-    ng_["ɵɵstyling"]();
     ng_["ɵɵpipe"](2, "slice");
     ng_["ɵɵpipe"](3, "titlecase");
     ng_["ɵɵpipe"](4, "lowercase");
     ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
-    ng_["ɵɵselect"](1);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵstyleSanitizer"](ng_["ɵɵdefaultStyleSanitizer"]);
     ng_["ɵɵstyleMap"](ctx.styles);
     ng_["ɵɵstyleProp"]("background-color", ctx.styleColor);
     ng_["ɵɵstylePropInterpolate1"]("background-color", "red", ng_["ɵɵpipeBind3"](2, 4, ng_["ɵɵpipeBind1"](3, 8, ng_["ɵɵpipeBind1"](4, 10, ctx.styleColor)), 2, 10), "");
-    ng_["ɵɵstylingApply"]();
   }
 }
 pipes: [
@@ -933,10 +1328,7 @@ class AppComponent {
 }
 
 hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
-  if (rf & 1) {
-    ng_["ɵɵallocHostVars"](6);
-    ng_["ɵɵstyling"]();
-  } if (rf & 2) {
+  if (rf & 2) {
     ng_["ɵɵhostProperty"]("id", ctx.appId);
     ng_["ɵɵattribute"]("title", ctx.appTitle);
     ng_["ɵɵstyleSanitizer"](ng_["ɵɵdefaultStyleSanitizer"]);
@@ -944,7 +1336,6 @@ hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
     ng_["ɵɵclassMap"](ctx.appClass);
     ng_["ɵɵstyleProp"]("font-size", ctx.appFontSize);
     ng_["ɵɵclassProp"]("theme", ctx.appTheme);
-    ng_["ɵɵstylingApply"]();
   }
 }
 ```
@@ -970,14 +1361,11 @@ class AppComponent {
 
 hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
   if (rf & 1) {
-    ng_["ɵɵallocHostVars"](1);
     ng_["ɵɵlistener"]("click", function AppComponent_click_HostBindingHandler($event) { 
       return ctx.onClick($event.target); 
     });
-    ng_["ɵɵstyling"]();
   } if (rf & 2) {
     ng_["ɵɵclassProp"]("theme", ctx.appTheme);
-    ng_["ɵɵstylingApply"]();
   }
 },
 ```

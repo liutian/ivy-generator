@@ -25,7 +25,7 @@ export class ViewQuery {
   }
 
   gRefreshCode() {
-    return `${apiPath_p}.ng_ɵɵqueryRefresh((_t = ${apiPath_p}.ng_ɵɵloadViewQuery())) && (ctx.${this.privateName} = ${this.onlyOne ? '_t.first' : '_t'});\n`;
+    return `${apiPath_p}.ng_ɵɵqueryRefresh((_t = ${apiPath_p}.ng_ɵɵloadQuery())) && (ctx.${this.privateName} = ${this.onlyOne ? '_t.first' : '_t'});\n`;
   }
 
 }

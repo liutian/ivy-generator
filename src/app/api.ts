@@ -1,8 +1,8 @@
 import {
   ɵɵdefineNgModule, ɵɵdefineInjector, ɵɵdefineComponent, ɵɵelementStart, ɵɵelementEnd,
-  ɵɵtext, ɵɵlistener, ɵɵselect, ɵɵproperty, ɵɵdirectiveInject, ɵɵstaticContentQuery,
-  ɵɵloadViewQuery, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵloadContentQuery, ɵɵqueryRefresh,
-  ɵɵcontentQuery, ɵɵallocHostVars, ɵɵhostProperty, EventEmitter, ɵɵtemplate, ɵɵelementContainerStart,
+  ɵɵtext, ɵɵlistener, ɵɵadvance, ɵɵproperty, ɵɵdirectiveInject, ɵɵstaticContentQuery,
+  ɵɵloadQuery, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵqueryRefresh,
+  ɵɵcontentQuery, ɵɵhostProperty, EventEmitter, ɵɵtemplate, ɵɵelementContainerStart,
   ɵɵelementContainerEnd, ɵɵgetCurrentView, ɵɵelement, ɵɵelementContainer, ɵɵtemplateRefExtractor,
   ɵɵrestoreView, ɵɵtextInterpolateV, ɵɵnextContext, ɵɵreference, ɵɵattribute, ɵɵattributeInterpolate1,
   ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5,
@@ -16,7 +16,7 @@ import {
   ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8,
   ɵɵstylePropInterpolateV, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3,
   ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8,
-  ɵɵpipe, ɵɵstyling, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵstylingApply,
+  ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV,
   ɵɵNgOnChangesFeature, ɵɵstyleSanitizer, ɵɵdefaultStyleSanitizer, ɵɵstyleMap, ɵɵclassProp, Injector,
   ElementRef, ɵɵprojectionDef, ɵɵprojection
 } from '@angular/core';
@@ -35,16 +35,14 @@ export class API {
   ng_ɵɵelementEnd: any;
   ng_ɵɵtext: any;
   ng_ɵɵlistener: any;
-  ng_ɵɵselect: any;
+  ng_ɵɵadvance: any;
   ng_ɵɵdirectiveInject: any;
   ng_ɵɵstaticContentQuery: any;
   ng_ɵɵcontentQuery: any;
   ng_ɵɵqueryRefresh: any;
-  ng_ɵɵloadContentQuery: any;
+  ng_ɵɵloadQuery: any;
   ng_ɵɵstaticViewQuery: any;
   ng_ɵɵviewQuery: any;
-  ng_ɵɵloadViewQuery: any;
-  ng_ɵɵallocHostVars: any;
   ng_ɵɵhostProperty: any;
   ng_ɵɵtemplate: any;
   ng_ɵɵelementContainerEnd: any;
@@ -108,13 +106,11 @@ export class API {
   ng_ɵɵtextInterpolate8: any;
   ng_ɵɵtextInterpolateV: any;
   ng_ɵɵpipe: any;
-  ng_ɵɵstyling: any;
   ng_ɵɵpipeBind1: any;
   ng_ɵɵpipeBind2: any;
   ng_ɵɵpipeBind3: any;
   ng_ɵɵpipeBind4: any;
   ng_ɵɵpipeBindV: any;
-  ng_ɵɵstylingApply: any;
   ng_ɵɵNgOnChangesFeature: any;
   ng_ɵɵstyleSanitizer: any;
   ng_ɵɵdefaultStyleSanitizer: any;
@@ -122,6 +118,7 @@ export class API {
   ng_ɵɵclassProp: any;
   ng_ɵɵprojectionDef: any;
   ng_ɵɵprojection: any;
+
 
   ng_HttpClient: any;
   ng_Injector: any;
@@ -149,16 +146,14 @@ export const apis: API = {
   ng_ɵɵelementEnd: ɵɵelementEnd,
   ng_ɵɵtext: ɵɵtext,
   ng_ɵɵlistener: ɵɵlistener,
-  ng_ɵɵselect: ɵɵselect,
+  ng_ɵɵadvance: ɵɵadvance,
   ng_ɵɵdirectiveInject: ɵɵdirectiveInject,
   ng_ɵɵstaticContentQuery: ɵɵstaticContentQuery,
   ng_ɵɵcontentQuery: ɵɵcontentQuery,
   ng_ɵɵqueryRefresh: ɵɵqueryRefresh,
-  ng_ɵɵloadContentQuery: ɵɵloadContentQuery,
   ng_ɵɵstaticViewQuery: ɵɵstaticViewQuery,
   ng_ɵɵviewQuery: ɵɵviewQuery,
-  ng_ɵɵloadViewQuery: ɵɵloadViewQuery,
-  ng_ɵɵallocHostVars: ɵɵallocHostVars,
+  ng_ɵɵloadQuery: ɵɵloadQuery,
   ng_ɵɵhostProperty: ɵɵhostProperty,
   ng_ɵɵtemplate: ɵɵtemplate,
   ng_ɵɵelementContainerEnd: ɵɵelementContainerEnd,
@@ -222,13 +217,11 @@ export const apis: API = {
   ng_ɵɵtextInterpolate8: ɵɵtextInterpolate8,
   ng_ɵɵtextInterpolateV: ɵɵtextInterpolateV,
   ng_ɵɵpipe: ɵɵpipe,
-  ng_ɵɵstyling: ɵɵstyling,
   ng_ɵɵpipeBind1: ɵɵpipeBind1,
   ng_ɵɵpipeBind2: ɵɵpipeBind2,
   ng_ɵɵpipeBind3: ɵɵpipeBind3,
   ng_ɵɵpipeBind4: ɵɵpipeBind4,
   ng_ɵɵpipeBindV: ɵɵpipeBindV,
-  ng_ɵɵstylingApply: ɵɵstylingApply,
   ng_ɵɵNgOnChangesFeature: ɵɵNgOnChangesFeature,
   ng_ɵɵstyleSanitizer: ɵɵstyleSanitizer,
   ng_ɵɵdefaultStyleSanitizer: ɵɵdefaultStyleSanitizer,
