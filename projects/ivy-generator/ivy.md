@@ -1355,19 +1355,32 @@ pipes: [
 ### @Input
 ```typescript
 class AppComponent {
-  @Input('appTitle') title = 'developer';
-  @Input() name = 'tome';
+  @Input('appTitle') title = 'hello world';
+  @Input() name = 'Tom';
 }
 ```
+
+uage
+```typescript
+demoComponentDef.inputs = [
+  new Input('appTitle', 'title', 'hello world'),
+  new Input('name', null, 'tom')
+];
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor() {
-    this.title = 'developer';
-    this.name = 'tome';
+    this.title = 'hello world';
+    this.name = 'Tom';
   }
 }
 
-inputs: { title: ["appTitle", "title"], name: "name" },
+inputs: { 
+  title: ["appTitle", "title"], 
+  name: "name" 
+},
 ```
 
 
@@ -1379,6 +1392,16 @@ class AppComponent {
   @Output() changeAddress = new EventEmitter();
 }
 ```
+
+usege
+```typescript
+demoComponentDef.outputs = [
+  new Output('appChangeTitle', 'changeTitle'),
+  new Output('changeAddress')
+];
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor() {
@@ -1387,7 +1410,10 @@ class AppComponent {
   }
 }
 
-outputs: { changeTitle: "appChangeTitle", changeAddress: "changeAddress" }, 
+outputs: { 
+  changeTitle: "appChangeTitle", 
+  changeAddress: "changeAddress" 
+}, 
 ```
 
 
@@ -1397,12 +1423,26 @@ outputs: { changeTitle: "appChangeTitle", changeAddress: "changeAddress" },
 class AppComponent {
   @HostBinding('class.theme') appTheme = true;
   @HostBinding('attr.title') appTitle = 'xxx';
-  @HostBinding('style.fontSize') appFontSize = '20px';
+  @HostBinding('style.font-size') appFontSize = '20px';
   @HostBinding('class') appClass = 'cl1 cl2';
   @HostBinding('style') appStyle = 'line-height: 2em;';
   @HostBinding('id') appId = 'app-host';
 }
 ```
+
+usage
+```typescript
+demoComponentDef.hostBindList = [
+  new HostBind('class.theme', 'appTheme', '@true'),
+  new HostBind('attr.title', 'appTitle', 'xxx'),
+  new HostBind('style.font-size', 'appFontSize', '20px'),
+  new HostBind('class', 'appClass', 'cl1 cl2'),
+  new HostBind('style', 'appStyle', 'line-height: 2em;'),
+  new HostBind('id', 'appId', 'app-host')
+];
+```
+
+compile
 ```javascript
 class AppComponent {
   constructor() {
@@ -1415,12 +1455,12 @@ class AppComponent {
   }
 }
 
+hostVars: 10,
 hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
   if (rf & 2) {
     ng_["ɵɵhostProperty"]("id", ctx.appId);
     ng_["ɵɵattribute"]("title", ctx.appTitle);
-    ng_["ɵɵstyleSanitizer"](ng_["ɵɵdefaultStyleSanitizer"]);
-    ng_["ɵɵstyleMap"](ctx.appStyle);
+    ng_["ɵɵstyleMap"](ctx.appStyle, ng_["ɵɵdefaultStyleSanitizer"]);
     ng_["ɵɵclassMap"](ctx.appClass);
     ng_["ɵɵstyleProp"]("font-size", ctx.appFontSize);
     ng_["ɵɵclassProp"]("theme", ctx.appTheme);
@@ -1428,20 +1468,26 @@ hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
 }
 ```
 
+
 ### @HostListener()
 ```typescript
 class AppComponent {
-  @HostBinding('class.theme') appTheme = true;
   @HostListener('click',['$event.target']) onClick(btn){
     console.log('click...');
   }
 }
 ```
+
+usage
+```typescript
+demoComponentDef.hostListenerList = [
+  new HostListener('click', 'onClick', ['$event.target'])
+];
+```
+
+compile
 ```javascript
 class AppComponent {
-  constructor() {
-    this.appTheme = true;
-  }
   onClick(btn) {
     console.log('click...');
   }
@@ -1452,8 +1498,6 @@ hostBindings: function AppComponent_HostBindings(rf, ctx, elIndex) {
     ng_["ɵɵlistener"]("click", function AppComponent_click_HostBindingHandler($event) { 
       return ctx.onClick($event.target); 
     });
-  } if (rf & 2) {
-    ng_["ɵɵclassProp"]("theme", ctx.appTheme);
-  }
+  } 
 },
 ```

@@ -26,6 +26,7 @@ export class ComponentDef {
   directives: string[] = [];
 
   _sourceCodes: string;
+  _hostVars = 0;
 
   constructor(public className: string, public rootChildren: Node[]) {
     this.rootNode = new Node('');
@@ -173,14 +174,14 @@ export class ComponentDef {
     if (this.inputs.length > 0) {
       inputsStr = `
       inputs: {
-        ${this.inputs.map(i => i.gInputCode()).join(',')}
+        ${this.inputs.map(i => i.gInputCode()).join(',\n')}
       },\n`;
     }
 
     if (this.outputs.length > 0) {
       outputsStr = `
       outputs: {
-        ${this.outputs.map(o => o.gOutputCode()).join(',')}
+        ${this.outputs.map(o => o.gOutputCode()).join(',\n')}
       },\n`;
     }
 
@@ -195,17 +196,16 @@ export class ComponentDef {
       return '';
     }
 
-    const styling = hostBindList.some(bind => {
-      return bind.styling();
-    });
-
-    let sanitizer = false;
-    const hostRefreshStr = hostBindList.sort(HostBind.compare).reduce((str, bind: HostBind) => {
-      if (bind.publicName === 'style' && !sanitizer) {
-        str += `${apiPath_p}.ng_ɵɵstyleSanitizer(${apiPath_p}.ng_ɵɵdefaultStyleSanitizer);\n`;
-        sanitizer = true;
+    this._hostVars = hostBindList.reduce((hostVars, bind) => {
+      if (bind.styling()) {
+        hostVars += 2;
+      } else {
+        hostVars += 1;
       }
+      return hostVars;
+    }, 0);
 
+    const hostRefreshStr = hostBindList.sort(HostBind.compare).reduce((str, bind: HostBind) => {
       // mark ... @HostBinding() get title(){}
       str += bind.gRefreshCode();
       return str;
@@ -217,6 +217,7 @@ export class ComponentDef {
     }, '');
 
     return `
+      hostVars: ${this._hostVars},
       hostBindings: function ${componentName_p}_HostBindings(rf,ctx,elIndex){
         if (rf & 1){
           ${hostListenerStr}

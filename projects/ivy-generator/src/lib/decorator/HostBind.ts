@@ -46,7 +46,7 @@ export class HostBind {
     } else if (this.publicName.startsWith('class')) {
       str += `${apiPath_p}.ng_ɵɵclassMap(ctx.${this.privateName});\n`;
     } else if (this.publicName.startsWith('style')) {
-      str += `${apiPath_p}.ng_ɵɵstyleMap(ctx.${this.privateName});\n`;
+      str += `${apiPath_p}.ng_ɵɵstyleMap(ctx.${this.privateName},${apiPath_p}.ng_ɵɵdefaultStyleSanitizer);\n`;
     } else {
       str += `${apiPath_p}.ng_ɵɵhostProperty('${this.publicName}' , ctx.${this.privateName});\n`;
     }
