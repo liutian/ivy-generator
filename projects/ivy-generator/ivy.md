@@ -5,7 +5,7 @@
 - `index` dom节点，模板变量，管道在模板中位置索引
 - `ɵɵpipeBindX(index,slotOffset)` 插值表达式中使用管道，index:管道的索引，slotOffset:数据偏移量，该值为组件范围内上一次使用的偏移量 + 上一次函数的管道参数（不包括第一个参数） + 2，该字段初始值为差值文本出现的个数
 
-*** 表达式中不能出现字面量值，例如：{'xx':yy}
+*** 表达式中不能出现对象字面量值，例如：{'xx':yy}
 *** ng-content不能嵌套在ng-template或者结构性指令中时会有问题
 *** 禁止style.xxx.yyy
 *** 禁止style.lineHeight,使用style.line-height代替
@@ -1086,7 +1086,36 @@ directives: [
 <div [ngClass]="cls"></div>
 <div [ngStyle]="styles"></div>
 ```
+
+```typescript
+class AppComponent {
+  cls = ['class1', 'class2'];
+  styles = {
+    fontSize: '12px',
+    color: 'red'
+  }
+}
+```
+
+usage
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('div', [new NodeAttr('[ngClass]', 'cls')]),
+  new Node('div', [new NodeAttr('[ngStyle]', 'styles')])
+]);
+
+demoComponentDef.classConstructor = `
+  this.cls = ['class1', 'class2'];
+  this.styles = {
+    fontSize: '12px',
+    color: 'red'
+  };
+`;
+```
+
+compile
 ```javascript
+consts: [[3, "ngClass"], [3, "ngStyle"]],
 decls: 2
 vars: 2
 
@@ -1116,6 +1145,18 @@ directives: [
 <ng-content selector="yyy"></ng-content>
 <ng-content></ng-content>
 ```
+
+usage
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('div', [], [new TextNode('content...')]),
+  new Node('ng-content', [new NodeAttr('selector', 'xxx')]),
+  new Node('ng-content', [new NodeAttr('selector', 'yyy')]),
+  new Node('ng-content')
+]);
+```
+
+compile
 ```javascript
 ngContentSelectors: ["*", "*", "*"]
 decls: 5
@@ -1138,50 +1179,6 @@ template: function Demo1Component_Template(rf, ctx) {
 ### class 多个差值多个管道多个参数 属性绑定 [class] 属性绑定 [class.xxx]
 ```html
 <div class="aaa bbb"></div>
-<div class="ccc ddd {{clsa | lowercase | titlecase | slice:2:10}} eee {{clsb}} fff
-  {{clsc}} ggg">
-</div>
-<div [class]="clsd"></div>
-<div [class.cls2]="cls2"></div>
-```
-```javascript
-decls: 7
-vars: 14
-
-template: function AppComponent_Template(rf, ctx) {
-    if (rf & 1) {
-        ng_["ɵɵelement"](0, "div", [1, "aaa", "bbb"]);
-        ng_["ɵɵelementStart"](1, "div");
-        ng_["ɵɵpipe"](2, "slice");
-        ng_["ɵɵpipe"](3, "titlecase");
-        ng_["ɵɵpipe"](4, "lowercase");
-        ng_["ɵɵelementEnd"]();
-        ng_["ɵɵelementStart"](5, "div");
-        ng_["ɵɵelementEnd"]();
-        ng_["ɵɵelementStart"](6, "div");
-        ng_["ɵɵelementEnd"]();
-    }
-    if (rf & 2) {
-        ng_["ɵɵadvance"](1);
-        ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 6, ng_["ɵɵpipeBind1"](3, 10, ng_["ɵɵpipeBind1"](4, 12, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff\n  ", ctx.clsc, " ggg");
-        ng_["ɵɵadvance"](5);
-        ng_["ɵɵclassMap"](ctx.clsd);
-        ng_["ɵɵadvance"](6);
-        ng_["ɵɵclassProp"]("cls2", ctx.cls2);
-    }
-},
-pipes: [
-    ng_["SlicePipe"],
-    ng_["TitleCasePipe"],
-    ng_["LowerCasePipe"]
-],
-```
-
-
-
-### style 多个差值多个管道多个参数 属性绑定 [style] 属性绑定 [style.xxx] style.xxx
-```html
-<div class="aaa bbb"></div>
 <div class="ccc ddd {{clsa | lowercase | titlecase | slice:2:10}} eee {{clsb}} fff{{ clsc }} ggg" title="{{title}}">
 </div>
 <div [class]="clsd"></div>
@@ -1191,45 +1188,86 @@ pipes: [
 </ng-template>
 <div [class.cls2]="cls2"></div>
 ```
+
+```typescript
+class AppComponent {
+  clsa = 'class-a';
+  clsb = 'class-b';
+  clsc = 'class-c';
+  clsd = 'class-d';
+  cls2 = 'class-2';
+  title = 'hello world';
+}
+```
+
+usage --- 异常
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('div', [new NodeAttr('class', 'aaa bbb')]),
+  new Node('div', [
+    // tslint:disable-next-line:quotemark
+    new NodeAttr('class', "ccc ddd {{clsa | lowercase | titlecase | slice:2:10}} eee {{clsb}} fff{{ clsc }} ggg"),
+    new NodeAttr('title', '{{title}}')
+  ]),
+  new Node('div', [new NodeAttr('[class]', 'clsd')]),
+  new Node('ng-template', [], [
+    new Node('div', [
+      new NodeAttr('class', 'ccc ddd {{clsa | lowercase | titlecase | slice:2:10}} eee {{clsb}} fff{{ clsc }} ggg'),
+      new NodeAttr('title', '{{title}}')
+    ])
+  ]),
+  new Node('div', [new NodeAttr('[class.cls2]', 'cls2')])
+]);
+
+demoComponentDef.classConstructor = `
+  this.clsa = 'class-a';
+  this.clsb = 'class-b';
+  this.clsc = 'class-c';
+  this.clsd = 'class-d';
+  this.cls2 = 'class-2';
+  this.text = 'hello world';
+  this.title = 'hello world';
+`;
+```
+
+compile
 ```javascript
 function AppComponent_ng_template_6_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementStart"](0, "div", [3, "title"]);
+    ng_["ɵɵelementStart"](0, "div", 1);
     ng_["ɵɵpipe"](1, "slice");
     ng_["ɵɵpipe"](2, "titlecase");
     ng_["ɵɵpipe"](3, "lowercase");
     ng_["ɵɵelementEnd"]();
   } if (rf & 2) {
     const ctx_r0 = ng_["ɵɵnextContext"]();
-    ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](1, 5, ng_["ɵɵpipeBind1"](2, 9, ng_["ɵɵpipeBind1"](3, 11, ctx_r0.clsa)), 2, 10), " eee ", ctx_r0.clsb, " fff", ctx_r0.clsc, " ggg");
+    ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](1, 6, ng_["ɵɵpipeBind1"](2, 10, ng_["ɵɵpipeBind1"](3, 12, ctx_r0.clsa)), 2, 10), " eee ", ctx_r0.clsb, " fff", ctx_r0.clsc, " ggg");
     ng_["ɵɵpropertyInterpolate"]("title", ctx_r0.title);
   }
 }
 
+consts: [[1, "aaa", "bbb"], [3, "title"]]
 decls: 8
-vars: 15
+vars: 18
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelement"](0, "div", [1, "aaa", "bbb"]);
-    ng_["ɵɵelementStart"](1, "div", [3, "title"]);
+    ng_["ɵɵelement"](0, "div", 0);
+    ng_["ɵɵelement"](1, "div", 1);
     ng_["ɵɵpipe"](2, "slice");
     ng_["ɵɵpipe"](3, "titlecase");
     ng_["ɵɵpipe"](4, "lowercase");
-    ng_["ɵɵelementEnd"]();
-    ng_["ɵɵelementStart"](5, "div");
-    ng_["ɵɵelementEnd"]();
-    ng_["ɵɵtemplate"](6, AppComponent_ng_template_6_Template, 4, 13, "ng-template");
-    ng_["ɵɵelementStart"](7, "div");
-    ng_["ɵɵelementEnd"]();
+    ng_["ɵɵelement"](5, "div");
+    ng_["ɵɵtemplate"](6, AppComponent_ng_template_6_Template, 4, 14, "ng-template");
+    ng_["ɵɵelement"](7, "div");
   }
   if (rf & 2) {
     ng_["ɵɵadvance"](1);
-    ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 7, ng_["ɵɵpipeBind1"](3, 11, ng_["ɵɵpipeBind1"](4, 13, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff", ctx.clsc, " ggg");
+    ng_["ɵɵclassMapInterpolate3"]("ccc ddd ", ng_["ɵɵpipeBind3"](2, 10, ng_["ɵɵpipeBind1"](3, 14, ng_["ɵɵpipeBind1"](4, 16, ctx.clsa)), 2, 10), " eee ", ctx.clsb, " fff", ctx.clsc, " ggg");
     ng_["ɵɵpropertyInterpolate"]("title", ctx.title);
-    ng_["ɵɵadvance"](5);
+    ng_["ɵɵadvance"](4);
     ng_["ɵɵclassMap"](ctx.clsd);
-    ng_["ɵɵadvance"](7);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵclassProp"]("cls2", ctx.cls2);
   }
 }
@@ -1241,31 +1279,65 @@ pipes: [
 ```
 
 
-### attr.xxx 多个差值多个管道多个参数 属性绑定 [attr.xxx]
+### style 多个差值多个管道多个参数 属性绑定 [style] 属性绑定 [style.xxx] style.xxx
 ```html
 <div style="font-size:20px;padding: 10px;"></div>
 <div style="font-size:20px;padding: 10px;" [style]="styles" [style.background-color]="styleColor"
   style.background-color="red{{styleColor| lowercase | titlecase | slice:2:10}}"></div>
 ```
+
+```typescript
+class AppComponent {
+  styles = {
+    fontSize: '12px',
+    color: 'red'
+  };
+
+  styleColor = 'blue';
+}
+```
+
+usage  --- 异常
+```typescript
+const demoComponentDef = new ComponentDef('Demo', [
+  new Node('div', [new NodeAttr('style', 'font-size:20px;padding: 10px;')]),
+  new Node('div', [
+    new NodeAttr('style', 'font-size:20px;padding: 10px;'),
+    new NodeAttr('[style]', 'styles'),
+    new NodeAttr('[style.background-color]', 'styleColor'),
+    new NodeAttr('style.background-color', 'red{{styleColor| lowercase | titlecase | slice:2:10}}')
+  ])
+]);
+
+demoComponentDef.classConstructor = `
+  this.styles = {
+    fontSize: '12px',
+    color: 'red'
+  };
+
+  this.styleColor = 'blue';
+`;
+```
+
+compile
 ```javascript
+consts: [[2, "font-size", "20px", "padding", "10px"]]
 decls: 5
-vars: 12
+vars: 15
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelement"](0, "div", [2, "font-size", "20px", "padding", "10px"]);
-    ng_["ɵɵelementStart"](1, "div", [2, "font-size", "20px", "padding", "10px"]);
+    ng_["ɵɵelement"](0, "div", 0);
+    ng_["ɵɵelement"](1, "div", 0);
     ng_["ɵɵpipe"](2, "slice");
     ng_["ɵɵpipe"](3, "titlecase");
     ng_["ɵɵpipe"](4, "lowercase");
-    ng_["ɵɵelementEnd"]();
   }
   if (rf & 2) {
     ng_["ɵɵadvance"](1);
-    ng_["ɵɵstyleSanitizer"](ng_["ɵɵdefaultStyleSanitizer"]);
-    ng_["ɵɵstyleMap"](ctx.styles);
+    ng_["ɵɵstyleMap"](ctx.styles,ng_["ɵɵdefaultStyleSanitizer"]);
     ng_["ɵɵstyleProp"]("background-color", ctx.styleColor);
-    ng_["ɵɵstylePropInterpolate1"]("background-color", "red", ng_["ɵɵpipeBind3"](2, 4, ng_["ɵɵpipeBind1"](3, 8, ng_["ɵɵpipeBind1"](4, 10, ctx.styleColor)), 2, 10), "");
+    ng_["ɵɵstylePropInterpolate1"]("background-color", "red", ng_["ɵɵpipeBind3"](2, 7, ng_["ɵɵpipeBind1"](3, 11, ng_["ɵɵpipeBind1"](4, 13, ctx.styleColor)), 2, 10), "");
   }
 }
 pipes: [
@@ -1274,6 +1346,10 @@ pipes: [
   ng_["LowerCasePipe"]
 ]
 ```
+
+
+### attr.xxx 多个差值多个管道多个参数 属性绑定 [attr.xxx]
+
 
 
 ### @Input

@@ -388,7 +388,7 @@ export class Node {
         const selectorValue = node.attrs.find((a => a.name === 'selector')).value;
         selectorParams = `['selector' , '${selectorValue}']`;
       }
-      initCodes.push(`${apiPath_p}.ng_ɵɵprojection(${node._index} , ${rootNode._ngContentIndex++} , ${selectorParams});`);
+      initCodes.push(`${apiPath_p}.ng_ɵɵprojection(${node._index} , ${rootNode._ngContentIndex++} , ${selectorParams});\n`);
     } else {
       if (node.children.length > 0 || node._eventAttrs.length > 0) {
         initCodes.push(`${apiPath_p}.ng_ɵɵelementStart(${node._index} , '${node.name}' , ${attrParamsIndex} , ${refParamsIndex});\n`);
