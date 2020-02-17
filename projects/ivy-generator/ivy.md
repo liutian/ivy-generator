@@ -5,10 +5,10 @@
 - `index` dom节点，模板变量，管道在模板中位置索引
 - `ɵɵpipeBindX(index,slotOffset)` 插值表达式中使用管道，index:管道的索引，slotOffset:数据偏移量，该值为组件范围内上一次使用的偏移量 + 上一次函数的管道参数（不包括第一个参数） + 2，该字段初始值为差值文本出现的个数
 
-*** 表达式中不能出现对象字面量值，例如：{'xx':yy}
-*** ng-content不能嵌套在ng-template或者结构性指令中时会有问题
-*** 禁止style.xxx.yyy
-*** 禁止style.lineHeight,使用style.line-height代替
+> 表达式中不能出现对象字面量值，例如：{'xx':yy}  
+> ng-content不能嵌套在ng-template或者结构性指令中时会有问题  
+> 禁止style.xxx.yyy  
+> 禁止style.lineHeight,使用style.line-height代替  
 
 
 ### example

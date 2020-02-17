@@ -3,6 +3,9 @@
 通过命令式api描述Angular组件，不需要依赖编译器直接生成Ivy代码，适合可视化搭建管理型页面的场景
 > 注意该项目属于底层实现，需要你关注很多底层细节
 
+## Usage
+[more](./projects/ivy-generator/ivy.md)
+
 ## Demo
 
 npm start
