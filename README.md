@@ -22,12 +22,12 @@ const componentMap = new Map();
 const factory = new CodeFactory(componentMap, directiveMap, pipeMap);
 
 // 组件描述
-const helloWorldComponent = new IvyComponent('div', [
+const helloWorldComponentDef = new ComponentDef('div', [
   new TextNode('hello world')
 ]);
 
 // 生成ivy代码
-const componentDef = factory._createComponent(helloWorldComponent);
+const componentDef = factory._createComponent(helloWorldComponentDef);
 
 console.log('Ivy Code: \n\n' + helloWorldComponent._sourceCodes);
 
