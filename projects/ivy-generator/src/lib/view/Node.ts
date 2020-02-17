@@ -507,7 +507,7 @@ export class Node {
     node._varsData.forEach((varData, i) => {
       const currNode = varData.node;
       if (currSelectIndex !== varData.index) {
-        refreshCodes.push(`${apiPath_p}.ng_ɵɵadvance(${varData.index});\n`);
+        refreshCodes.push(`${apiPath_p}.ng_ɵɵadvance(${varData.index - currSelectIndex});\n`);
         currSelectIndex = varData.index;
         currSelectCodeIndex = refreshCodes.length - 1;
         currStyleSanitizer = false;

@@ -972,7 +972,15 @@ directives: [ng_["NgForOf"]],
 </ng-container>
 ```
 
-```typescript  --- 异常
+```typescript
+class AppComponent {
+  title = 'xxx';
+  list = ['Tom', 'Jack', 'David'];
+}
+```
+
+usage
+```typescript 
 const demoComponentDef = new ComponentDef('Demo', [
   new Node('div', [], [
     new TextNode('head: {{title}}')
@@ -981,7 +989,7 @@ const demoComponentDef = new ComponentDef('Demo', [
     new NodeAttr('*ngFor', 'let item of list;let i = index;'),
     new NodeAttr('#title')
   ], [
-    new Node('div', [], [new Node('ngFor: {{title}}')]),
+    new Node('div', [], [new TextNode('ngFor: {{title}}')]),
     new Node('ng-container', [
       new NodeAttr('*ngIf', 'i % 2 === 0'),
       new NodeAttr('#title')
@@ -999,10 +1007,11 @@ demoComponentDef.classConstructor = `
 `;
 ```
 
+compile
 ```javascript
 function AppComponent_ng_container_2_ng_container_4_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementContainerStart"](0, null, ["title", ""]);
+    ng_["ɵɵelementContainerStart"](0, null, 1);
     ng_["ɵɵelementStart"](2, "div");
     ng_["ɵɵtext"](3);
     ng_["ɵɵelementEnd"]();
@@ -1013,51 +1022,54 @@ function AppComponent_ng_container_2_ng_container_4_Template(rf, ctx) {
     ng_["ɵɵtext"](7);
     ng_["ɵɵelementEnd"]();
     ng_["ɵɵelementContainerEnd"]();
-  } if (rf & 2) {
+  } 
+  if (rf & 2) {
     const _r5 = ng_["ɵɵreference"](1);
     const ctx_r6 = ng_["ɵɵnextContext"]();
     const i_r2 = ctx_r6.index;
     const item_r1 = ctx_r6.$implicit;
     ng_["ɵɵadvance"](3);
     ng_["ɵɵtextInterpolate1"]("index: ", i_r2, "");
-    ng_["ɵɵadvance"](5);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵtextInterpolate1"]("name: ", item_r1, "");
-    ng_["ɵɵadvance"](7);
+    ng_["ɵɵadvance"](2);
     ng_["ɵɵtextInterpolate1"]("ngIf: ", _r5, "");
   }
 }
+
 function AppComponent_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
-    ng_["ɵɵelementContainerStart"](0, null, ["title", ""]);
+    ng_["ɵɵelementContainerStart"](0, null, 1);
     ng_["ɵɵelementStart"](2, "div");
     ng_["ɵɵtext"](3);
     ng_["ɵɵelementEnd"]();
-    ng_["ɵɵtemplate"](4, AppComponent_ng_container_2_ng_container_4_Template, 8, 3, "ng-container", [4, "ngIf"]);
+    ng_["ɵɵtemplate"](4, AppComponent_ng_container_2_ng_container_4_Template, 8, 3, "ng-container", 2);
     ng_["ɵɵelementContainerEnd"]();
   } if (rf & 2) {
     const i_r2 = ctx.index;
     const _r3 = ng_["ɵɵreference"](1);
     ng_["ɵɵadvance"](3);
     ng_["ɵɵtextInterpolate1"]("ngFor: ", _r3, "");
-    ng_["ɵɵadvance"](4);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵproperty"]("ngIf", i_r2 % 2 === 0);
   }
 }
 
+consts: [[4, "ngFor", "ngForOf"], ["title", ""], [4, "ngIf"]]
 decls: 3
 vars: 2
-
 
 template: function AppComponent_Template(rf, ctx) {
   if (rf & 1) {
     ng_["ɵɵelementStart"](0, "div");
     ng_["ɵɵtext"](1);
     ng_["ɵɵelementEnd"]();
-    ng_["ɵɵtemplate"](2, AppComponent_ng_container_2_Template, 5, 2, "ng-container", [4, "ngFor", "ngForOf"]);
-  } if (rf & 2) {
+    ng_["ɵɵtemplate"](2, AppComponent_ng_container_2_Template, 5, 2, "ng-container", 0);
+  } 
+  if (rf & 2) {
     ng_["ɵɵadvance"](1);
     ng_["ɵɵtextInterpolate1"]("head: ", ctx.title, "");
-    ng_["ɵɵadvance"](2);
+    ng_["ɵɵadvance"](1);
     ng_["ɵɵproperty"]("ngForOf", ctx.list);
   }
 }, 
